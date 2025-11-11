@@ -16,11 +16,6 @@
   "editor.renderWhitespace": "boundary",
   "editor.mouseWheelZoom": true,
 
-  "git.enableCommitSigning": true,
-  "git.confirmSync": false,
-  "terminal.integrated.tabs.enabled": true,
-  "terminal.integrated.tabs.location": "left",
-
   "javascript.format.semicolons": "insert",
   "typescript.format.semicolons": "insert",
   "i18n-ally.localesPaths": ["locales"],

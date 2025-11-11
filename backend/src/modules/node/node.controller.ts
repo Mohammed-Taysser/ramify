@@ -143,7 +143,7 @@ async function createNode(request: Request, response: Response) {
     throw new NotFoundError('Parent node not found');
   }
 
-  if (body.operation === 'START') {
+  if (body.operation === 'START' || body.operation === 'END') {
     return response.status(400).json({ error: 'Invalid operation' });
   }
 
