@@ -38,6 +38,9 @@ tags:
   - name: Trees
     description: Trees-related operations
 
+  - name: Nodes
+    description: Nodes-related operations
+
 security:
   - bearerAuth: []
 
@@ -77,11 +80,11 @@ paths:
                 email:
                   type: string
                   format: email
-                  example: 'john@example.com'
+                  example: 'admin@demo.com'
                 password:
                   type: string
                   format: password
-                  example: 'StrongPassword123'
+                  example: '123456789'
 
       responses:
         201:
@@ -502,7 +505,7 @@ paths:
         - $ref: '#/components/parameters/PageParameter'
         - $ref: '#/components/parameters/LimitParameter'
         - in: query
-          name: name
+          name: title
           schema: { type: string, minLength: 3, maxLength: 100 }
 
       responses:
@@ -610,6 +613,126 @@ paths:
                       data:
                         type: object
                         example: { deleted: true }
+
+  /node:
+    get:
+      summary: Get all nodes
+      tags:
+        - Nodes
+      parameters:
+        - $ref: '#/components/parameters/PageParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+        - in: query
+          name: operation
+          schema: { type: string, minLength: 3, maxLength: 100 }
+
+      responses:
+        '200':
+          description: List of nodes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: All nodes
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Node'
+                      metadata:
+                        $ref: '#/components/schemas/PaginationMetadata'
+
+    post:
+      summary: Create a new node
+      tags:
+        - Nodes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - parentId
+                - operation
+                - value
+              properties:
+                operation:
+                  type: enum
+                  enum: [END, ADD, SUBTRACT, MULTIPLY, DIVIDE]
+                value:
+                  type: number
+                parentId:
+                  type: number
+      responses:
+        '201':
+          description: Node created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Node'
+
+  /node/list:
+    get:
+      summary: Get a list of nodes
+      tags:
+        - Nodes
+      parameters:
+        - $ref: '#/components/parameters/PageParameter'
+        - $ref: '#/components/parameters/LimitParameter'
+        - in: query
+          name: operation
+          schema: { type: string, minLength: 3, maxLength: 100 }
+
+      responses:
+        '200':
+          description: List of nodes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+
+  /node/{nodeId}:
+    get:
+      summary: Get a node by ID
+      tags:
+        - Nodes
+      parameters:
+        - in: path
+          name: nodeId
+          required: true
+          schema:
+            type: string
+          description: The ID of the node
+      responses:
+        '200':
+          description: Node found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Node found
+                  data:
+                    $ref: '#/components/schemas/Node'
+        '404':
+          description: Node not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
@@ -775,7 +898,7 @@ components:
           format: enum
           example: START
           enum: [START, END, ADD, SUBTRACT, MULTIPLY, DIVIDE]
-        rightOperand:
+        totals:
           type: integer
           format: integer
           example: 2

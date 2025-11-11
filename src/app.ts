@@ -10,9 +10,10 @@ import YAML from 'yamljs';
 import CONFIG from '@/apps/config';
 import errorHandlerMiddleware from '@/middleware/error-handler.middleware';
 import authRoutes from '@/modules/auth/auth.route';
+import nodeRoutes from '@/modules/node/node.route';
 import systemRoutes from '@/modules/system/system.route';
-import userRoutes from '@/modules/user/user.route';
 import treeRoutes from '@/modules/tree/tree.route';
+import userRoutes from '@/modules/user/user.route';
 import { ForbiddenError, NotFoundError } from '@/utils/errors.utils';
 import { logServerInfo } from '@/utils/system-info-logs';
 
@@ -67,6 +68,7 @@ app.use('/api/', systemRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tree', treeRoutes);
+app.use('/api/node', nodeRoutes);
 
 // 404 Handler
 app.use((req, _res, next) => {

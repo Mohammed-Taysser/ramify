@@ -35,17 +35,17 @@ model Tree {
 }
 
 model Node {
-  id           Int       @id @default(autoincrement())
-  treeId       Int
-  parentId     Int?
-  operation    OPERATION
-  rightOperand Float
-  value        Float
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  user         User?     @relation(fields: [createdBy], references: [id])
-  createdBy    Int
-  tree         Tree      @relation(fields: [treeId], references: [id])
+  id        Int       @id @default(autoincrement())
+  treeId    Int
+  parentId  Int?
+  operation OPERATION
+  totals    Float
+  value     Float
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User?     @relation(fields: [createdBy], references: [id])
+  createdBy Int
+  tree      Tree      @relation(fields: [treeId], references: [id])
 }
 
 enum OPERATION {

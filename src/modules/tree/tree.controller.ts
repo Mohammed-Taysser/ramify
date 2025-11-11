@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { OPERATION, Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import {
@@ -171,8 +171,8 @@ async function createTree(request: Request, response: Response) {
       nodes: {
         create: [
           {
-            operation: 'START',
-            rightOperand: body.startingNumber,
+            operation: OPERATION.START,
+            totals: body.startingNumber,
             value: body.startingNumber,
             createdBy: user.id,
           },
