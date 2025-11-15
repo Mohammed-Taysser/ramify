@@ -6,34 +6,34 @@ import validator from './user.validator';
 import authenticateMiddleware from '@/middleware/authenticate.middleware';
 import validateRequest from '@/middleware/validate-request.middleware';
 
-const userRouter = Router();
+const userRoutes = Router();
 
-userRouter.patch(
+userRoutes.patch(
   '/me',
   validateRequest(validator.updateMeSchema),
   authenticateMiddleware,
   controller.updateMe
 );
-userRouter.get('/me', authenticateMiddleware, controller.getProfile);
+userRoutes.get('/me', authenticateMiddleware, controller.getProfile);
 
-userRouter.get('/list', validateRequest(validator.getUsersListSchema), controller.getUsersList);
-userRouter.get('/', validateRequest(validator.getUsersListSchema), controller.getUsers);
+userRoutes.get('/list', validateRequest(validator.getUsersListSchema), controller.getUsersList);
+userRoutes.get('/', validateRequest(validator.getUsersListSchema), controller.getUsers);
 
-userRouter.get('/:userId', validateRequest(validator.getUserByIdSchema), controller.getUserById);
+userRoutes.get('/:userId', validateRequest(validator.getUserByIdSchema), controller.getUserById);
 
-userRouter.post(
+userRoutes.post(
   '/',
   authenticateMiddleware,
   validateRequest(validator.createUserSchema),
   controller.createUser
 );
 
-userRouter.patch(
+userRoutes.patch(
   '/:userId',
   authenticateMiddleware,
   validateRequest(validator.updateUserSchema),
   controller.updateUser
 );
-userRouter.delete('/:userId', authenticateMiddleware, controller.deleteUser);
+userRoutes.delete('/:userId', authenticateMiddleware, controller.deleteUser);
 
-export default userRouter;
+export default userRoutes;

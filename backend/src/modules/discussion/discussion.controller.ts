@@ -1,31 +1,31 @@
-import { OPERATION, Prisma } from '@prisma/client';
+import { OPERATION_TYPE, Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import {
-  CreateTreeInput,
-  GetTreeByIdParams,
-  GetTreesListQuery,
-  UpdateTreeInput,
-} from './tree.validator';
+  CreateDiscussionInput,
+  GetDiscussionByIdParams,
+  GetDiscussionsListQuery,
+  UpdateDiscussionInput,
+} from './discussion.validator';
 
 import prisma from '@/apps/prisma';
 import { AuthenticatedRequest } from '@/types/import';
 import { NotFoundError } from '@/utils/errors.utils';
 import { sendPaginatedResponse, sendSuccessResponse } from '@/utils/response.utils';
 
-async function getTrees(request: Request, response: Response) {
+async function getDiscussions(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
     unknown,
     unknown,
     unknown,
-    GetTreesListQuery
+    GetDiscussionsListQuery
   >;
 
   const query = authenticatedRequest.parsedQuery;
 
   const skip = (query.page - 1) * query.limit;
 
-  const filters: Prisma.TreeWhereInput = {};
+  const filters: Prisma.DiscussionWhereInput = {};
 
   if (query.title) {
     filters.title = {
@@ -33,8 +33,16 @@ async function getTrees(request: Request, response: Response) {
     };
   }
 
+  if (query.userId) {
+    filters.user = {
+      id: {
+        equals: query.userId,
+      },
+    };
+  }
+
   const [data, total] = await Promise.all([
-    prisma.tree.findMany({
+    prisma.discussion.findMany({
       skip,
       take: query.limit,
       orderBy: { createdAt: 'desc' },
@@ -47,7 +55,7 @@ async function getTrees(request: Request, response: Response) {
             email: true,
           },
         },
-        nodes: {
+        operations: {
           orderBy: { id: 'asc' },
           include: {
             user: {
@@ -61,14 +69,14 @@ async function getTrees(request: Request, response: Response) {
         },
       },
     }),
-    prisma.tree.count({
+    prisma.discussion.count({
       where: filters,
     }),
   ]);
 
   sendPaginatedResponse({
     response,
-    message: 'All trees',
+    message: 'All discussions',
     data,
     metadata: {
       total,
@@ -79,17 +87,17 @@ async function getTrees(request: Request, response: Response) {
   });
 }
 
-async function getTreesList(request: Request, response: Response) {
+async function getDiscussionsList(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
     unknown,
     unknown,
     unknown,
-    GetTreesListQuery
+    GetDiscussionsListQuery
   >;
 
   const query = authenticatedRequest.parsedQuery;
 
-  const filters: Prisma.TreeWhereInput = {};
+  const filters: Prisma.DiscussionWhereInput = {};
 
   if (query.title) {
     filters.title = {
@@ -97,7 +105,15 @@ async function getTreesList(request: Request, response: Response) {
     };
   }
 
-  const trees = await prisma.tree.findMany({
+  if (query.userId) {
+    filters.user = {
+      id: {
+        equals: query.userId,
+      },
+    };
+  }
+
+  const discussions = await prisma.discussion.findMany({
     select: {
       id: true,
       title: true,
@@ -105,12 +121,12 @@ async function getTreesList(request: Request, response: Response) {
     where: filters,
   });
 
-  sendSuccessResponse({ response, message: 'Trees list', data: trees });
+  sendSuccessResponse({ response, message: 'Discussions list', data: discussions });
 }
 
-async function getTreeById(request: Request, response: Response) {
+async function getDiscussionById(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
-    GetTreeByIdParams,
+    GetDiscussionByIdParams,
     unknown,
     unknown,
     unknown
@@ -118,8 +134,8 @@ async function getTreeById(request: Request, response: Response) {
 
   const { params } = authenticatedRequest;
 
-  const tree = await prisma.tree.findUnique({
-    where: { id: params.treeId },
+  const discussion = await prisma.discussion.findUnique({
+    where: { id: params.discussionId },
     include: {
       user: {
         select: {
@@ -128,7 +144,7 @@ async function getTreeById(request: Request, response: Response) {
           email: true,
         },
       },
-      nodes: {
+      operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
@@ -143,35 +159,35 @@ async function getTreeById(request: Request, response: Response) {
     },
   });
 
-  if (!tree) {
-    throw new NotFoundError('Tree not found');
+  if (!discussion) {
+    throw new NotFoundError('Discussion not found');
   }
 
   sendSuccessResponse({
     response,
-    message: 'Tree found',
-    data: tree,
+    message: 'Discussion found',
+    data: discussion,
   });
 }
 
-async function createTree(request: Request, response: Response) {
+async function createDiscussion(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
     unknown,
     unknown,
-    CreateTreeInput,
+    CreateDiscussionInput,
     unknown
   >;
 
   const { body, user } = authenticatedRequest;
 
-  const treeWithStartNode = await prisma.tree.create({
+  const discussionWithStartOperation = await prisma.discussion.create({
     data: {
       title: body.title,
       createdBy: user.id,
-      nodes: {
+      operations: {
         create: [
           {
-            operation: OPERATION.START,
+            operationType: OPERATION_TYPE.START,
             totals: body.startingNumber,
             value: body.startingNumber,
             createdBy: user.id,
@@ -187,7 +203,7 @@ async function createTree(request: Request, response: Response) {
           email: true,
         },
       },
-      nodes: {
+      operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
@@ -204,32 +220,32 @@ async function createTree(request: Request, response: Response) {
 
   sendSuccessResponse({
     response,
-    message: 'Tree created',
-    data: treeWithStartNode,
+    message: 'Discussion created',
+    data: discussionWithStartOperation,
     statusCode: 201,
   });
 }
 
-async function updateTree(request: Request, response: Response) {
+async function updateDiscussion(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
-    GetTreeByIdParams,
+    GetDiscussionByIdParams,
     unknown,
-    UpdateTreeInput,
+    UpdateDiscussionInput,
     unknown
   >;
 
   const { body, params } = authenticatedRequest;
 
-  const tree = await prisma.tree.findUnique({
-    where: { id: params.treeId },
+  const discussion = await prisma.discussion.findUnique({
+    where: { id: params.discussionId },
   });
 
-  if (!tree) {
-    throw new NotFoundError('Tree not found');
+  if (!discussion) {
+    throw new NotFoundError('Discussion not found');
   }
 
-  const updatedTree = await prisma.tree.update({
-    where: { id: params.treeId },
+  const updatedDiscussion = await prisma.discussion.update({
+    where: { id: params.discussionId },
     data: {
       ...body,
     },
@@ -241,7 +257,7 @@ async function updateTree(request: Request, response: Response) {
           email: true,
         },
       },
-      nodes: {
+      operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
@@ -258,31 +274,31 @@ async function updateTree(request: Request, response: Response) {
 
   sendSuccessResponse({
     response,
-    message: 'Tree updated',
-    data: updatedTree,
+    message: 'Discussion updated',
+    data: updatedDiscussion,
   });
 }
 
-async function deleteTree(request: Request, response: Response) {
+async function deleteDiscussion(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
-    GetTreeByIdParams,
+    GetDiscussionByIdParams,
     unknown,
     unknown,
     unknown
   >;
 
-  const treeId = authenticatedRequest.params.treeId;
+  const discussionId = authenticatedRequest.params.discussionId;
 
-  const tree = await prisma.tree.findUnique({
-    where: { id: treeId },
+  const discussion = await prisma.discussion.findUnique({
+    where: { id: discussionId },
   });
 
-  if (!tree) {
-    throw new NotFoundError('Tree not found');
+  if (!discussion) {
+    throw new NotFoundError('Discussion not found');
   }
 
-  const deletedTree = await prisma.tree.delete({
-    where: { id: treeId },
+  const deletedDiscussion = await prisma.discussion.delete({
+    where: { id: discussionId },
     include: {
       user: {
         select: {
@@ -291,7 +307,7 @@ async function deleteTree(request: Request, response: Response) {
           email: true,
         },
       },
-      nodes: {
+      operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
@@ -308,18 +324,18 @@ async function deleteTree(request: Request, response: Response) {
 
   sendSuccessResponse({
     response,
-    message: 'Tree deleted',
-    data: deletedTree,
+    message: 'Discussion deleted',
+    data: deletedDiscussion,
   });
 }
 
-const treeController = {
-  createTree,
-  deleteTree,
-  getTreeById,
-  getTrees,
-  getTreesList,
-  updateTree,
+const discussionController = {
+  createDiscussion,
+  deleteDiscussion,
+  getDiscussionById,
+  getDiscussions,
+  getDiscussionsList,
+  updateDiscussion,
 };
 
-export default treeController;
+export default discussionController;

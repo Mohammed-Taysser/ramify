@@ -35,11 +35,11 @@ tags:
   - name: Users
     description: User-related operations
 
-  - name: Trees
-    description: Trees-related operations
+  - name: Discussions
+    description: Discussions-related operations
 
-  - name: Nodes
-    description: Nodes-related operations
+  - name: Operations
+    description: Operations-related operations
 
 security:
   - bearerAuth: []
@@ -433,11 +433,11 @@ paths:
                         type: object
                         example: { deleted: true }
 
-  /tree:
+  /discussion:
     get:
-      summary: Get all trees
+      summary: Get all discussions
       tags:
-        - Trees
+        - Discussions
       parameters:
         - $ref: '#/components/parameters/PageParameter'
         - $ref: '#/components/parameters/LimitParameter'
@@ -447,7 +447,7 @@ paths:
 
       responses:
         '200':
-          description: List of trees
+          description: List of discussions
           content:
             application/json:
               schema:
@@ -455,21 +455,21 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: All trees
+                    example: All discussions
                   data:
                     type: object
                     properties:
                       data:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Tree'
+                          $ref: '#/components/schemas/Discussion'
                       metadata:
                         $ref: '#/components/schemas/PaginationMetadata'
 
     post:
-      summary: Create a new tree
+      summary: Create a new discussion
       tags:
-        - Trees
+        - Discussions
       requestBody:
         required: true
         content:
@@ -485,7 +485,7 @@ paths:
                   type: number
       responses:
         '201':
-          description: Tree created successfully
+          description: Discussion created successfully
           content:
             application/json:
               schema:
@@ -494,13 +494,13 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/Tree'
+                        $ref: '#/components/schemas/Discussion'
 
-  /tree/list:
+  /discussion/list:
     get:
-      summary: Get a list of trees
+      summary: Get a list of discussions
       tags:
-        - Trees
+        - Discussions
       parameters:
         - $ref: '#/components/parameters/PageParameter'
         - $ref: '#/components/parameters/LimitParameter'
@@ -510,27 +510,27 @@ paths:
 
       responses:
         '200':
-          description: List of trees
+          description: List of discussions
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListResponse'
 
-  /tree/{treeId}:
+  /discussion/{discussionId}:
     get:
-      summary: Get a tree by ID
+      summary: Get a discussion by ID
       tags:
-        - Trees
+        - Discussions
       parameters:
         - in: path
-          name: treeId
+          name: discussionId
           required: true
           schema:
             type: string
-          description: The ID of the tree
+          description: The ID of the discussion
       responses:
         '200':
-          description: Tree found
+          description: Discussion found
           content:
             application/json:
               schema:
@@ -538,27 +538,27 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Tree found
+                    example: Discussion found
                   data:
-                    $ref: '#/components/schemas/Tree'
+                    $ref: '#/components/schemas/Discussion'
         '404':
-          description: Tree not found
+          description: Discussion not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
     patch:
-      summary: Update a tree by ID
+      summary: Update a discussion by ID
       tags:
-        - Trees
+        - Discussions
       parameters:
         - in: path
-          name: treeId
+          name: discussionId
           required: true
           schema:
             type: string
-          description: The ID of the tree
+          description: The ID of the discussion
       requestBody:
         required: true
         content:
@@ -571,7 +571,7 @@ paths:
 
       responses:
         '200':
-          description: Tree updated
+          description: Discussion updated
           content:
             application/json:
               schema:
@@ -579,30 +579,30 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Tree updated
+                    example: Discussion updated
                   data:
-                    $ref: '#/components/schemas/Tree'
+                    $ref: '#/components/schemas/Discussion'
         '404':
-          description: Tree not found
+          description: Discussion not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
     delete:
-      tags: [Trees]
-      summary: Delete a tree
+      tags: [Discussions]
+      summary: Delete a discussion
       security:
         - bearerAuth: []
       parameters:
         - in: path
-          name: treeId
+          name: discussionId
           required: true
           schema:
             type: string
       responses:
         200:
-          description: Tree deleted successfully
+          description: Discussion deleted successfully
           content:
             application/json:
               schema:
@@ -614,21 +614,27 @@ paths:
                         type: object
                         example: { deleted: true }
 
-  /node:
+  /operation:
     get:
-      summary: Get all nodes
+      summary: Get all operations
       tags:
-        - Nodes
+        - Operations
       parameters:
         - $ref: '#/components/parameters/PageParameter'
         - $ref: '#/components/parameters/LimitParameter'
         - in: query
-          name: operation
-          schema: { type: string, minLength: 3, maxLength: 100 }
+          name: operationType
+          schema:
+            {
+              type: enum,
+              enum: [END, ADD, SUBTRACT, MULTIPLY, DIVIDE],
+              minLength: 3,
+              maxLength: 100,
+            }
 
       responses:
         '200':
-          description: List of nodes
+          description: List of operations
           content:
             application/json:
               schema:
@@ -636,21 +642,21 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: All nodes
+                    example: All operations
                   data:
                     type: object
                     properties:
                       data:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Node'
+                          $ref: '#/components/schemas/Operation'
                       metadata:
                         $ref: '#/components/schemas/PaginationMetadata'
 
     post:
-      summary: Create a new node
+      summary: Create a new operation
       tags:
-        - Nodes
+        - Operations
       requestBody:
         required: true
         content:
@@ -659,10 +665,10 @@ paths:
               type: object
               required:
                 - parentId
-                - operation
+                - operationType
                 - value
               properties:
-                operation:
+                operationType:
                   type: enum
                   enum: [END, ADD, SUBTRACT, MULTIPLY, DIVIDE]
                 value:
@@ -671,7 +677,7 @@ paths:
                   type: number
       responses:
         '201':
-          description: Node created successfully
+          description: Operation created successfully
           content:
             application/json:
               schema:
@@ -680,43 +686,43 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/Node'
+                        $ref: '#/components/schemas/Operation'
 
-  /node/list:
+  /operation/list:
     get:
-      summary: Get a list of nodes
+      summary: Get a list of operations
       tags:
-        - Nodes
+        - Operations
       parameters:
         - $ref: '#/components/parameters/PageParameter'
         - $ref: '#/components/parameters/LimitParameter'
         - in: query
-          name: operation
+          name: operationType
           schema: { type: string, minLength: 3, maxLength: 100 }
 
       responses:
         '200':
-          description: List of nodes
+          description: List of operations
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListResponse'
 
-  /node/{nodeId}:
+  /operation/{operationId}:
     get:
-      summary: Get a node by ID
+      summary: Get a operation by ID
       tags:
-        - Nodes
+        - Operations
       parameters:
         - in: path
-          name: nodeId
+          name: operationId
           required: true
           schema:
             type: string
-          description: The ID of the node
+          description: The ID of the operation
       responses:
         '200':
-          description: Node found
+          description: Operation found
           content:
             application/json:
               schema:
@@ -724,11 +730,11 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Node found
+                    example: Operation found
                   data:
-                    $ref: '#/components/schemas/Node'
+                    $ref: '#/components/schemas/Operation'
         '404':
-          description: Node not found
+          description: Operation not found
           content:
             application/json:
               schema:
@@ -848,7 +854,7 @@ components:
           format: date-time
           example: 2022-01-01T00:00:00.000Z
 
-    Tree:
+    Discussion:
       type: object
       properties:
         id:
@@ -858,7 +864,7 @@ components:
         title:
           type: string
           format: string
-          example: My Tree
+          example: My Discussion
         createdBy:
           type: integer
           format: integer
@@ -873,19 +879,19 @@ components:
           example: 2022-01-01T00:00:00.000Z
         user:
           $ref: '#/components/schemas/User'
-        nodes:
+        operations:
           type: array
           items:
-            $ref: '#/components/schemas/Node'
+            $ref: '#/components/schemas/Operation'
 
-    Node:
+    Operation:
       type: object
       properties:
         id:
           type: integer
           format: integer
           example: 1
-        treeId:
+        discussionId:
           type: integer
           format: integer
           example: 1
@@ -893,7 +899,7 @@ components:
           type: integer
           format: integer
           example: null
-        operation:
+        operationType:
           type: enunm
           format: enum
           example: START

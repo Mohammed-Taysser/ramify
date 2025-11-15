@@ -20,9 +20,9 @@ Built for the **Ellty Full-Stack Developer Test Assignment**.
 ## 🧩 Features
 
 - User signup/login with JWT
-- Create a starting number (tree root)
+- Create a starting number (discussion root)
 - Add operations (+ − × ÷) as discussion replies
-- View full computation trees
+- View full computation discussions
 - Data persisted in PostgreSQL via Prisma
 
 ---

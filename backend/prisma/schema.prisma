@@ -14,41 +14,41 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  nodes     Node[]
-  trees     Tree[]
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  name        String
+  password    String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  operations  Operation[]
+  discussions Discussion[]
 }
 
-model Tree {
-  id        Int      @id @default(autoincrement())
-  title     String?
-  createdBy Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  nodes     Node[]
-  user      User?    @relation(fields: [createdBy], references: [id])
+model Discussion {
+  id         Int         @id @default(autoincrement())
+  title      String?
+  createdBy  Int
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  operations Operation[]
+  user       User?       @relation(fields: [createdBy], references: [id])
 }
 
-model Node {
-  id        Int       @id @default(autoincrement())
-  treeId    Int
-  parentId  Int?
-  operation OPERATION
-  totals    Float
-  value     Float
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  user      User?     @relation(fields: [createdBy], references: [id])
-  createdBy Int
-  tree      Tree      @relation(fields: [treeId], references: [id])
+model Operation {
+  id            Int            @id @default(autoincrement())
+  discussionId  Int
+  parentId      Int?
+  operationType OPERATION_TYPE
+  totals        Float
+  value         Float
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User?          @relation(fields: [createdBy], references: [id])
+  createdBy     Int
+  discussion    Discussion     @relation(fields: [discussionId], references: [id])
 }
 
-enum OPERATION {
+enum OPERATION_TYPE {
   START
   END
   ADD

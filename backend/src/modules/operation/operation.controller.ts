@@ -1,35 +1,39 @@
 import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 
-import { CreateNodeInput, GetNodeByIdParams, GetNodesListQuery } from './node.validator';
+import {
+  CreateOperationInput,
+  GetOperationByIdParams,
+  GetOperationsListQuery,
+} from './operation.validator';
 
 import prisma from '@/apps/prisma';
 import { AuthenticatedRequest } from '@/types/import';
 import { NotFoundError } from '@/utils/errors.utils';
 import { sendPaginatedResponse, sendSuccessResponse } from '@/utils/response.utils';
 
-async function getNodes(request: Request, response: Response) {
+async function getOperations(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
     unknown,
     unknown,
     unknown,
-    GetNodesListQuery
+    GetOperationsListQuery
   >;
 
   const query = authenticatedRequest.parsedQuery;
 
   const skip = (query.page - 1) * query.limit;
 
-  const filters: Prisma.NodeWhereInput = {};
+  const filters: Prisma.OperationWhereInput = {};
 
-  if (query.operation) {
-    filters.operation = {
-      in: query.operation,
+  if (query.operationType) {
+    filters.operationType = {
+      in: query.operationType,
     };
   }
 
   const [data, total] = await Promise.all([
-    prisma.node.findMany({
+    prisma.operation.findMany({
       skip,
       take: query.limit,
       orderBy: { createdAt: 'desc' },
@@ -44,14 +48,14 @@ async function getNodes(request: Request, response: Response) {
         },
       },
     }),
-    prisma.node.count({
+    prisma.operation.count({
       where: filters,
     }),
   ]);
 
   sendPaginatedResponse({
     response,
-    message: 'All nodes',
+    message: 'All operations',
     data,
     metadata: {
       total,
@@ -62,38 +66,38 @@ async function getNodes(request: Request, response: Response) {
   });
 }
 
-async function getNodesList(request: Request, response: Response) {
+async function getOperationsList(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
     unknown,
     unknown,
     unknown,
-    GetNodesListQuery
+    GetOperationsListQuery
   >;
 
   const query = authenticatedRequest.parsedQuery;
 
-  const filters: Prisma.NodeWhereInput = {};
+  const filters: Prisma.OperationWhereInput = {};
 
-  if (query.operation) {
-    filters.operation = {
-      in: query.operation,
+  if (query.operationType) {
+    filters.operationType = {
+      in: query.operationType,
     };
   }
 
-  const nodes = await prisma.node.findMany({
+  const operations = await prisma.operation.findMany({
     select: {
       id: true,
-      operation: true,
+      operationType: true,
     },
     where: filters,
   });
 
-  sendSuccessResponse({ response, message: 'Nodes list', data: nodes });
+  sendSuccessResponse({ response, message: 'Operations list', data: operations });
 }
 
-async function getNodeById(request: Request, response: Response) {
+async function getOperationById(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
-    GetNodeByIdParams,
+    GetOperationByIdParams,
     unknown,
     unknown,
     unknown
@@ -101,8 +105,8 @@ async function getNodeById(request: Request, response: Response) {
 
   const { params } = authenticatedRequest;
 
-  const node = await prisma.node.findUnique({
-    where: { id: params.nodeId },
+  const operation = await prisma.operation.findUnique({
+    where: { id: params.operationId },
     include: {
       user: {
         select: {
@@ -114,33 +118,33 @@ async function getNodeById(request: Request, response: Response) {
     },
   });
 
-  if (!node) {
-    throw new NotFoundError('Node not found');
+  if (!operation) {
+    throw new NotFoundError('Operation not found');
   }
 
   sendSuccessResponse({
     response,
-    message: 'Node found',
-    data: node,
+    message: 'Operation found',
+    data: operation,
   });
 }
 
-async function createNode(request: Request, response: Response) {
+async function createOperation(request: Request, response: Response) {
   const authenticatedRequest = request as unknown as AuthenticatedRequest<
     unknown,
     unknown,
-    CreateNodeInput,
+    CreateOperationInput,
     unknown
   >;
 
   const { body, user } = authenticatedRequest;
 
-  const parentNode = await prisma.node.findUnique({
+  const parentOperation = await prisma.operation.findUnique({
     where: { id: body.parentId },
   });
 
-  if (!parentNode) {
-    throw new NotFoundError('Parent node not found');
+  if (!parentOperation) {
+    throw new NotFoundError('Parent operation not found');
   }
 
   if (body.operation === 'START' || body.operation === 'END') {
@@ -151,29 +155,29 @@ async function createNode(request: Request, response: Response) {
     return response.status(400).json({ error: 'cannot divide by zero' });
   }
 
-  let nodeValue = 0;
+  let operationValue = 0;
 
   switch (body.operation) {
     case 'ADD':
-      nodeValue = parentNode.totals + body.value;
+      operationValue = parentOperation.totals + body.value;
       break;
     case 'SUBTRACT':
-      nodeValue = parentNode.totals - body.value;
+      operationValue = parentOperation.totals - body.value;
       break;
     case 'MULTIPLY':
-      nodeValue = parentNode.totals * body.value;
+      operationValue = parentOperation.totals * body.value;
       break;
     case 'DIVIDE':
-      nodeValue = parentNode.totals / body.value;
+      operationValue = parentOperation.totals / body.value;
       break;
   }
 
-  const node = await prisma.node.create({
+  const operation = await prisma.operation.create({
     data: {
-      treeId: parentNode.treeId,
-      parentId: parentNode.id,
-      operation: body.operation,
-      totals: nodeValue,
+      discussionId: parentOperation.discussionId,
+      parentId: parentOperation.id,
+      operationType: body.operation,
+      totals: operationValue,
       createdBy: user.id,
       value: body.value,
     },
@@ -190,17 +194,17 @@ async function createNode(request: Request, response: Response) {
 
   sendSuccessResponse({
     response,
-    message: 'Node created',
-    data: node,
+    message: 'Operation created',
+    data: operation,
     statusCode: 201,
   });
 }
 
-const nodeController = {
-  createNode,
-  getNodeById,
-  getNodes,
-  getNodesList,
+const operationController = {
+  createOperation,
+  getOperationById,
+  getOperations,
+  getOperationsList,
 };
 
-export default nodeController;
+export default operationController;
