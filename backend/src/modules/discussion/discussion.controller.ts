@@ -1,4 +1,4 @@
-import { OPERATION_TYPE, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import {
@@ -184,16 +184,7 @@ async function createDiscussion(request: Request, response: Response) {
     data: {
       title: body.title,
       createdBy: user.id,
-      operations: {
-        create: [
-          {
-            operationType: OPERATION_TYPE.START,
-            totals: body.startingNumber,
-            value: body.startingNumber,
-            createdBy: user.id,
-          },
-        ],
-      },
+      startingValue: body.startingValue,
     },
     include: {
       user: {

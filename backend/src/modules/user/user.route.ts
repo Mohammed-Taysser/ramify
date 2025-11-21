@@ -10,8 +10,8 @@ const userRoutes = Router();
 
 userRoutes.patch(
   '/me',
-  validateRequest(validator.updateMeSchema),
   authenticateMiddleware,
+  validateRequest(validator.updateMeSchema),
   controller.updateMe
 );
 userRoutes.get('/me', authenticateMiddleware, controller.getProfile);

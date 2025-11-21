@@ -42,7 +42,7 @@ function validateRequest(schemas: Schemas) {
       next();
     } catch (err) {
       if (err instanceof ZodError) {
-        throw new BadRequestError(err.issues);
+        throw new BadRequestError(err.issues.map((issue) => `${issue.path}: ${issue.message}`));
       }
 
       next(err);

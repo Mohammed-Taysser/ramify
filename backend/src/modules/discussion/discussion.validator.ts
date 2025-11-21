@@ -18,7 +18,7 @@ const getDiscussionByIdSchema = {
 const createDiscussionSchema = {
   body: z.object({
     title: z.string().trim().min(3).max(100),
-    startingNumber: z.coerce.number().min(0).max(100),
+    startingValue: z.coerce.number(),
   }),
 };
 

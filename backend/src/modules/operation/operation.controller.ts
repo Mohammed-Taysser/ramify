@@ -147,10 +147,6 @@ async function createOperation(request: Request, response: Response) {
     throw new NotFoundError('Parent operation not found');
   }
 
-  if (body.operation === 'START' || body.operation === 'END') {
-    return response.status(400).json({ error: 'Invalid operation' });
-  }
-
   if (body.operation === 'DIVIDE' && body.value === 0) {
     return response.status(400).json({ error: 'cannot divide by zero' });
   }

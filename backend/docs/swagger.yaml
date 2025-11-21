@@ -481,7 +481,7 @@ paths:
               properties:
                 title:
                   type: string
-                startingNumber:
+                startingValue:
                   type: number
       responses:
         '201':
@@ -861,6 +861,10 @@ components:
           type: integer
           format: integer
           example: 1
+        startingValue:
+          type: integer
+          format: integer
+          example: 2
         title:
           type: string
           format: string

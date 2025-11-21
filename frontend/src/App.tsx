@@ -1,33 +1,33 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import DiscussionDetailPage from './pages/DiscussionDetail.page';
-import HomePage from './pages/Home.page';
-import LoginPage from './pages/Login.page';
-import NotFoundPage from './pages/NotFound.page';
-import RegisterPage from './pages/Register.page';
+import advancedFormat from 'dayjs/plugin/advancedFormat';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import localeData from 'dayjs/plugin/localeData';
+import weekday from 'dayjs/plugin/weekday';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+import weekYear from 'dayjs/plugin/weekYear';
+import { RouterProvider } from 'react-router-dom';
+import routes from './apps/routes';
+import AntDesignProvider from './providers/AntDesignProvider';
+import AuthProvider from './providers/AuthProvider';
 
 import '@ant-design/v5-patch-for-react-19';
 import './assets/css/style.css';
-import AntDesignProvider from './providers/AntDesignProvider';
 
 dayjs.extend(relativeTime);
-
-
-
+dayjs.extend(customParseFormat);
+dayjs.extend(advancedFormat);
+dayjs.extend(weekday);
+dayjs.extend(localeData);
+dayjs.extend(weekOfYear);
+dayjs.extend(weekYear);
 
 function App() {
   return (
     <AntDesignProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/discussion/:id" element={<DiscussionDetailPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <RouterProvider router={routes} />
+      </AuthProvider>
     </AntDesignProvider>
   );
 }

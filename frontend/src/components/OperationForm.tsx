@@ -17,7 +17,7 @@ const operations = [
   { type: "divide" as OperationType, icon: Divide, label: "Divide", symbol: "÷" },
 ];
 
-export const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFormProps) => {
+  const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFormProps) => {
   const [selectedType, setSelectedType] = useState<OperationType>("ADD");
   const [operand, setOperand] = useState<number>(0);
 
@@ -83,7 +83,7 @@ export const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFor
         <Card
           style={{ 
             backgroundColor: "#f5f5f5",
-            border: "2px solid #1890ff"
+            border: "2px solid #08b52e"
           }}
         >
           <Text type="secondary" style={{ display: "block", marginBottom: 8 }}>Preview</Text>
@@ -93,7 +93,7 @@ export const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFor
               <Text>{operations.find((op) => op.type === selectedType)?.symbol}</Text>
               <Text strong>{operand.toFixed(2)}</Text>
               <Text>=</Text>
-              <Text strong style={{ color: "#1890ff" }}>{calculatePreview().toFixed(2)}</Text>
+              <Text strong style={{ color: "#08b52e" }}>{calculatePreview().toFixed(2)}</Text>
             </Space>
           </div>
         </Card>
@@ -112,3 +112,5 @@ export const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFor
     </Card>
   );
 };
+
+export default OperationForm;

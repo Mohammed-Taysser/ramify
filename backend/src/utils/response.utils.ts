@@ -27,7 +27,7 @@ function sendSuccessResponse<T>(params: SuccessResponseParams<T>) {
     success: true,
     message,
     data: {
-      data,
+      ...data,
     },
   });
 }

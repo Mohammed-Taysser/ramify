@@ -1,32 +1,13 @@
-import { MAIN_FONT } from '../configs/theme.config';
-import {
-  App as AntDesignApp,
-  ConfigProvider
-} from 'antd';
+import { LIGHT_ANT_THEME } from '@/apps/config';
+import { App as AntDesignApp, ConfigProvider } from 'antd';
 import { type PropsWithChildren } from 'react';
 
 function AntDesignProvider(props: Readonly<PropsWithChildren>) {
   const { children } = props;
 
- 
-
   return (
     <ConfigProvider
- 
-      theme={{
-     
-        token: {
-      
-          fontFamily: MAIN_FONT,
-
-         },
-        components: {
-          Typography: {
-            fontFamily: MAIN_FONT,
-          },
- 
-        },
-      }}
+      theme={LIGHT_ANT_THEME}
     >
       <AntDesignApp>{children}</AntDesignApp>
     </ConfigProvider>

@@ -1,27 +1,56 @@
-import { App, Button, Card, Form, Input, Space, Typography,   } from "antd";
-import { MessageSquare } from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import authApi from '@/api/auth.api';
+import { LOCAL_STORAGE_KEYS, SITEMAP } from '@/apps/config';
+import AuthContext from '@/context/auth.context';
+import useApiMessage from '@/hooks/useApiMessage';
+import { App, Button, Card, Form, Input, Space, Typography } from 'antd';
+import { MessageSquare } from 'lucide-react';
+import { useContext, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
- 
 function LoginPage() {
   const navigateTo = useNavigate();
 
+  const [searchParams] = useSearchParams();
+
+  const { displayErrorMessages } = useApiMessage();
+
   const app = App.useApp();
+
+  const [form] = Form.useForm<LoginFormFields>();
+
+  const authContext = useContext(AuthContext);
 
   const [loading, setLoading] = useState(false);
 
-  const onFinish = (values: { email: string; password: string; }) => {
+  const onFinish = async (values: LoginFormFields) => {
     setLoading(true);
 
-    console.log(values);
-    
+    try {
+      const response = await authApi.login(values);
+      const loginResponse = response.data.data;
 
-    setTimeout(() => {
-      app.message.success("Welcome back!, mohammed");
+      app.message.success(`Welcome back, ${loginResponse.user.name}`);
+
+      localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, loginResponse.accessToken);
+
+      localStorage.setItem(LOCAL_STORAGE_KEYS.refreshToken, loginResponse.refreshToken);
+
+      localStorage.setItem(LOCAL_STORAGE_KEYS.user, JSON.stringify(loginResponse.user));
+
+      authContext.setUser(loginResponse.user);
+
+      const nextUrl = searchParams.get('nextUrl');
+
+      if (nextUrl && nextUrl !== SITEMAP.login.path) {
+        navigateTo(nextUrl);
+      } else {
+        navigateTo('/');
+      }
+    } catch (error) {
+      displayErrorMessages(error);
+    } finally {
       setLoading(false);
-      navigateTo("/");
-    }, 500);
+    }
   };
 
   return (
@@ -35,31 +64,19 @@ function LoginPage() {
         </div>
 
         <Card>
-          <Typography.Title level={3} className="!mb-0">Welcome back</Typography.Title>
-          <Typography.Title level={5} className="!mt-1" type="secondary">Sign in to your account to continue</Typography.Title>
+          <Typography.Title level={3} className="!mb-0">
+            Welcome back
+          </Typography.Title>
+          <Typography.Title level={5} className="!mt-1" type="secondary">
+            Sign in to your account to continue
+          </Typography.Title>
 
-          <Form
-            layout="vertical"
-            onFinish={onFinish}
-            className="!mt-4"
-            size="large"
-          >
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                { required: true, },
-                { type: "email", }
-              ]}
-            >
+          <Form layout="vertical" onFinish={onFinish} className="!mt-4" size="large" form={form}>
+            <Form.Item<LoginFormFields> label="Email" name="email" rules={[{ required: true }, { type: 'email' }]}>
               <Input placeholder="you@example.com" />
             </Form.Item>
 
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[{ required: true, }]}
-            >
+            <Form.Item<LoginFormFields> label="Password" name="password" rules={[{ required: true }]}>
               <Input.Password placeholder="••••••••" />
             </Form.Item>
 
@@ -72,10 +89,7 @@ function LoginPage() {
 
           <div className="text-center mt-4">
             <Typography.Text type="secondary">
-              Don't have an account?{" "}
-              <Link to="/register"  >
-                Sign up
-              </Link>
+              Don't have an account? <Link to="/register">Sign up</Link>
             </Typography.Text>
           </div>
         </Card>

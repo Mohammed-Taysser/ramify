@@ -7,18 +7,21 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit"
   },
-
   "editor.guides.bracketPairs": true,
   "editor.wordWrap": "on",
-  "editor.rulers": [80, 120],
+  "editor.rulers": [
+    80,
+    120
+  ],
   "editor.fontLigatures": true,
   "editor.cursorBlinking": "expand",
   "editor.renderWhitespace": "boundary",
   "editor.mouseWheelZoom": true,
-
   "javascript.format.semicolons": "insert",
   "typescript.format.semicolons": "insert",
-  "i18n-ally.localesPaths": ["locales"],
+  "i18n-ally.localesPaths": [
+    "locales"
+  ],
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
