@@ -6,8 +6,8 @@ import useApiMessage from '@/hooks/useApiMessage';
 import { Button, Card, Col, Empty, Row, Skeleton, Space, Timeline, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { ArrowLeft, Calculator, Clock, MessageSquare, Plus, User } from 'lucide-react';
-import { useContext, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
 const { Title, Text } = Typography;
 
@@ -42,6 +42,30 @@ const DiscussionDetail = () => {
       setIsLoading(false);
     }
   };
+
+  const currentValue = useMemo(() => {
+    if (!fetchedDiscussion) {
+      return 0;
+    }
+
+    if (!fetchedDiscussion.operations || fetchedDiscussion.operations.length === 0) {
+      return fetchedDiscussion.startingValue;
+    }
+
+    // Find the latest leaf operation (one with no children)
+    const leafOperations = fetchedDiscussion.operations.filter(
+      (op) => !fetchedDiscussion.operations.some((child) => child.parentId === op.id)
+    );
+
+    // If we have leaf operations, return the maximum afterValue among them
+    // (representing the latest state in any branch)
+    if (leafOperations.length > 0) {
+      const afterValues = leafOperations.map((op) => op.afterValue || 0);
+      return Math.max(...afterValues);
+    }
+
+    return fetchedDiscussion.startingValue;
+  }, [fetchedDiscussion]);
 
   const getOperationSymbol = (type: OperationType) => {
     switch (type) {
@@ -126,11 +150,14 @@ const DiscussionDetail = () => {
                     <Text type="secondary">•</Text>
                     <Text
                       strong
-                      className={`font-mono text-xl ${
-                        (Math.random() * 10) > 5 ? '!text-green-500' : '!text-red-500'
-                      }`}
+                      className={`font-mono text-xl ${currentValue > fetchedDiscussion.startingValue
+                          ? '!text-green-500'
+                          : currentValue < fetchedDiscussion.startingValue
+                            ? '!text-red-500'
+                            : '!text-gray-500'
+                        }`}
                     >
-                      Current: 0.0
+                      Current: {currentValue.toFixed(2)}
                     </Text>
                   </Space>
                 </Col>
@@ -167,7 +194,7 @@ const DiscussionDetail = () => {
                         type="primary"
                         size="large"
                         icon={<Plus className="h-5 w-5" />}
-                        // onClick={handleAddRootOperation}
+                      // onClick={handleAddRootOperation}
                       >
                         Add Root Operation
                       </Button>
@@ -207,7 +234,7 @@ const DiscussionDetail = () => {
                                     <span className="text-sm text-gray-500">=</span>
 
                                     <span className="text-lg font-bold font-mono text-gray-900">
-                                      {operation.totals.toFixed(2)}
+                                      {operation.afterValue.toFixed(2)}
                                     </span>
                                   </Space>
                                 </div>
@@ -236,7 +263,7 @@ const DiscussionDetail = () => {
                                   type="dashed"
                                   size="large"
                                   icon={<Plus className="w-4 h-4" />}
-                                  // onClick={() => onAddOperation(operation.id)}
+                                // onClick={() => onAddOperation(operation.id)}
                                 >
                                   Add Operation
                                 </Button>

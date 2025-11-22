@@ -1,10 +1,12 @@
-type OperationType = "START" | "END" | "ADD" | "SUBTRACT" | "MULTIPLY" | "DIVIDE";
+type OperationType = 'ADD' | 'SUBTRACT' | 'MULTIPLY' | 'DIVIDE';
 
-interface Operation extends BaseEntity{
-  treeId: number;
-  parentId: number;
+interface Operation extends BaseEntity {
+  discussionId: number;
+  parentId: number | null;
+  title?: string;
   operationType: OperationType;
-  totals: number;
   value: number;
+  beforeValue: number;
+  afterValue: number;
   user: User;
 }

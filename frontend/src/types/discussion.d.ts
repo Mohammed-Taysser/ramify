@@ -1,11 +1,10 @@
-
-
-
 interface Discussion extends BaseEntity {
   title: string;
   operations: Operation[];
   user: User;
   startingValue: number;
+  isEnded: boolean;
+  endedAt: string | null;
 }
 
 interface DiscussionFilterParams {
