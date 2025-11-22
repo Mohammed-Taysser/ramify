@@ -81,16 +81,47 @@ async function main() {
   const operations: Operation[] = [];
 
   for (const operationData of seedData.operations) {
+    // Calculate beforeValue from parent or starting value
+    let beforeValue: number;
+    if (operationData.parentOperationIndex === null) {
+      // Root operation: beforeValue is the discussion's starting value
+      beforeValue = discussions[operationData.discussionIndex].startingValue;
+    } else {
+      // Child operation: beforeValue is parent's afterValue
+      beforeValue = operations[operationData.parentOperationIndex].afterValue;
+    }
+
+    // Calculate afterValue based on operation type
+    let afterValue: number;
+    switch (operationData.operationType) {
+      case 'ADD':
+        afterValue = beforeValue + operationData.value;
+        break;
+      case 'SUBTRACT':
+        afterValue = beforeValue - operationData.value;
+        break;
+      case 'MULTIPLY':
+        afterValue = beforeValue * operationData.value;
+        break;
+      case 'DIVIDE':
+        afterValue = beforeValue / operationData.value;
+        break;
+      default:
+        afterValue = beforeValue;
+    }
+
     const operation = await prisma.operation.create({
       data: {
         discussionId: discussions[operationData.discussionIndex].id,
         parentId:
-          operationData.parentOperationIndex == null
+          operationData.parentOperationIndex === null
             ? null
             : operations[operationData.parentOperationIndex].id,
+        title: `${operationData.operationType} ${operationData.value}`,
         operationType: OPERATION_TYPE[operationData.operationType],
         value: operationData.value,
-        totals: operationData.totals,
+        beforeValue,
+        afterValue,
         createdBy: users[operationData.createdByIndex].id,
       },
     });
