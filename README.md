@@ -1,9 +1,7 @@
-# Number Discussion App
+# Ramify
 
 A full-stack demo project where users communicate using numbers through operations, forming calculation trees.  
 Built for the **Ellty Full-Stack Developer Test Assignment**.
-
----
 
 ## 🚀 Stack
 
@@ -15,8 +13,6 @@ Built for the **Ellty Full-Stack Developer Test Assignment**.
 | Auth      | JWT + bcrypt                         |
 | Container | Docker Compose                       |
 
----
-
 ## 🧩 Features
 
 - User signup/login with JWT authentication
@@ -27,15 +23,11 @@ Built for the **Ellty Full-Stack Developer Test Assignment**.
 - Data persisted in PostgreSQL via Prisma
 - Comprehensive API documentation with Swagger
 
----
-
 ## 📚 Documentation
 
 - **[Setup Guide](./backend/docs/SETUP.md)** - Complete installation and configuration instructions
 - **[Swagger API Docs](http://localhost:8080/docs)** - Interactive API documentation (when running)
 - **[Tree Update Algorithm](./backend/docs/TREE_UPDATE_ALGORITHM.md)** - How operation recalculation works
-
----
 
 ## 🛠️ Quick Start
 
@@ -97,8 +89,6 @@ yarn dev
 
 Frontend runs on `http://localhost:5173`
 
----
-
 ## 🔐 Demo Credentials
 
 After seeding the database, you can login with:
@@ -106,13 +96,9 @@ After seeding the database, you can login with:
 - **Email:** `alice@demo.com` (or bob, charlie, diana, eve)
 - **Password:** Value of `SEED_USER_PASSWORD` from your `.env` (default: `Demo@123456`)
 
----
-
 ## 📖 Learn More
 
 For detailed setup instructions, troubleshooting, and API usage, see the [Setup Guide](./backend/docs/SETUP.md).
-
----
 
 ## 🧪 Available Scripts
 
@@ -135,8 +121,6 @@ For detailed setup instructions, troubleshooting, and API usage, see the [Setup 
 | `yarn dev`     | Start development server |
 | `yarn build`   | Build for production     |
 | `yarn preview` | Preview production build |
-
----
 
 ## 🏗️ Project Structure
 
@@ -161,24 +145,18 @@ ellty-second-task/
 └── docker-compose.yml     # PostgreSQL setup
 ```
 
----
-
 ## 🤝 Contributing
 
 This is a test assignment project. For issues or suggestions, please open an issue on GitHub.
-
----
 
 ## 📄 License
 
 MIT
 
----
-
 ## 👤 Author
 
 **Mohammed Taysser**
 
-- GitHub: [@mohammed-taysser](https://github.com/mohammed-taysser)
-- Email: mohammedtaysser983@gmail.com
-- Portfolio: [https://mohammed-taysser.github.io/portfolio](https://mohammed-taysser.github.io/portfolio)
+- GitHub: [mohammed-taysser](https://github.com/mohammed-taysser)
+- Email: [mohammedtaysser983@gmail.com](mailto:mohammedtaysser983@gmail.com)
+- Portfolio: [mohammed-taysser.github.io/portfolio](https://mohammed-taysser.github.io/portfolio)

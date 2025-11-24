@@ -1,6 +1,6 @@
-# Setup Guide - Number Discussion App
+# Setup Guide - Ramify
 
-This guide will walk you through setting up the Number Discussion App locally for development.
+This guide will walk you through setting up Ramify locally for development.
 
 ## Prerequisites
 
