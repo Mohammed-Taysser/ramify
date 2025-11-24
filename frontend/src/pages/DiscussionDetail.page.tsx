@@ -25,6 +25,8 @@ const DiscussionDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchedDiscussion, setFetchedDiscussion] = useState<Maybe<Discussion>>();
 
+  const [editingOperation, setEditingOperation] = useState<Operation | null>(null);
+
   useEffect(() => {
     if (discussionId && !Number.isNaN(Number(discussionId))) {
       fetchDiscussionByID(Number(discussionId));
@@ -53,16 +55,12 @@ const DiscussionDetail = () => {
       return fetchedDiscussion.startingValue;
     }
 
-    // Find the latest leaf operation (one with no children)
-    const leafOperations = fetchedDiscussion.operations.filter(
-      (op) => !fetchedDiscussion.operations.some((child) => child.parentId === op.id)
-    );
-
-    // If we have leaf operations, return the maximum afterValue among them
-    // (representing the latest state in any branch)
-    if (leafOperations.length > 0) {
-      const afterValues = leafOperations.map((op) => op.afterValue || 0);
-      return Math.max(...afterValues);
+    // Find the latest operation by createdAt
+    if (fetchedDiscussion.operations.length > 0) {
+      const latestOperation = [...fetchedDiscussion.operations].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )[0];
+      return latestOperation.afterValue;
     }
 
     return fetchedDiscussion.startingValue;
@@ -72,6 +70,7 @@ const DiscussionDetail = () => {
     if (!fetchedDiscussion) return;
 
     setSelectedParentId(null); // null indicates root operation
+    setEditingOperation(null);
     setShowOperationForm(true);
   };
 
@@ -87,19 +86,33 @@ const DiscussionDetail = () => {
     }
   };
 
+  const handleEditOperation = (operation: Operation) => {
+    setEditingOperation(operation);
+    setShowOperationForm(true);
+  };
+
   const handleOperationSubmit = async (type: OperationType, operand: number, title?: string) => {
     if (!fetchedDiscussion) return;
 
     try {
-      await operationApi.create({
-        operation: type,
-        value: operand,
-        parentId: selectedParentId,
-        discussionId: fetchedDiscussion.id,
-        title,
-      });
+      if (editingOperation) {
+        await operationApi.update(editingOperation.id, {
+          operationType: type,
+          value: operand,
+          title,
+        });
+      } else {
+        await operationApi.create({
+          operation: type,
+          value: operand,
+          parentId: selectedParentId,
+          discussionId: fetchedDiscussion.id,
+          title,
+        });
+      }
 
       setShowOperationForm(false);
+      setEditingOperation(null);
       fetchDiscussionByID(fetchedDiscussion.id);
     } catch (error) {
       displayErrorMessages(error);
@@ -110,6 +123,7 @@ const DiscussionDetail = () => {
     if (!fetchedDiscussion) return;
 
     setSelectedParentId(parentId);
+    setEditingOperation(null);
     setShowOperationForm(true);
   };
 
@@ -126,17 +140,35 @@ const DiscussionDetail = () => {
     <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
       <Modal
         open={showOperationForm}
-        onCancel={() => setShowOperationForm(false)}
+        onCancel={() => {
+          setShowOperationForm(false);
+          setEditingOperation(null);
+        }}
         footer={null}
       >
         <OperationForm
           currentValue={
-            selectedParentId === null
-              ? fetchedDiscussion?.startingValue || 0
-              : fetchedDiscussion?.operations.find((op) => op.id === selectedParentId)?.afterValue || 0
+            editingOperation
+              ? editingOperation.beforeValue
+              : selectedParentId === null
+                ? fetchedDiscussion?.startingValue || 0
+                : fetchedDiscussion?.operations.find((op) => op.id === selectedParentId)?.afterValue || 0
           }
+          initialValues={
+            editingOperation
+              ? {
+                type: editingOperation.operationType,
+                operand: editingOperation.value,
+                title: editingOperation.title || '',
+              }
+              : undefined
+          }
+          mode={editingOperation ? 'edit' : 'create'}
           onSubmit={handleOperationSubmit}
-          onCancel={() => setShowOperationForm(false)}
+          onCancel={() => {
+            setShowOperationForm(false);
+            setEditingOperation(null);
+          }}
         />
       </Modal>
 
@@ -256,6 +288,7 @@ const DiscussionDetail = () => {
                   <DiscussionTree
                     operations={operationTree}
                     onAddChild={handleAddChildOperation}
+                    onEdit={handleEditOperation}
                     isEnded={fetchedDiscussion?.isEnded}
                   />
                 )}

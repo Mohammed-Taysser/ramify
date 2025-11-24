@@ -6,10 +6,11 @@ import { Timeline } from 'antd';
 interface DiscussionTreeProps {
   operations: TreeOperation[];
   onAddChild: (id: number) => void;
+  onEdit: (operation: TreeOperation) => void;
   isEnded?: boolean;
 }
 
-const DiscussionTree = ({ operations, onAddChild, isEnded }: DiscussionTreeProps) => {
+const DiscussionTree = ({ operations, onAddChild, onEdit, isEnded }: DiscussionTreeProps) => {
   if (!operations || operations.length === 0) {
     return null;
   }
@@ -35,6 +36,7 @@ const DiscussionTree = ({ operations, onAddChild, isEnded }: DiscussionTreeProps
               <OperationCard
                 operation={operation}
                 onAddChild={onAddChild}
+                onEdit={onEdit}
                 disabledAdd={isEnded}
               />
               {operation.children.length > 0 && (
@@ -42,6 +44,8 @@ const DiscussionTree = ({ operations, onAddChild, isEnded }: DiscussionTreeProps
                   <DiscussionTree
                     operations={operation.children}
                     onAddChild={onAddChild}
+                    onEdit={onEdit}
+                    isEnded={isEnded}
                   />
                 </div>
               )}

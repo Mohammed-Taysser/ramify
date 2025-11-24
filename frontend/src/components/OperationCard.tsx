@@ -3,7 +3,7 @@ import { getOperationColor, getOperationSymbol } from '@/utils/operation.utils';
 import type { TreeOperation } from '@/utils/tree.utils';
 import { Button, Card, Col, Row, Space, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { Clock, Plus, User } from 'lucide-react';
+import { Clock, Pencil, Plus, User } from 'lucide-react';
 import { useContext } from 'react';
 
 const { Text } = Typography;
@@ -11,10 +11,11 @@ const { Text } = Typography;
 interface OperationCardProps {
   operation: TreeOperation;
   onAddChild: (id: number) => void;
+  onEdit: (operation: TreeOperation) => void;
   disabledAdd?: boolean;
 }
 
-const OperationCard = ({ operation, onAddChild, disabledAdd }: OperationCardProps) => {
+const OperationCard = ({ operation, onAddChild, onEdit, disabledAdd }: OperationCardProps) => {
   const authContext = useContext(AuthContext);
   const symbol = getOperationSymbol(operation.operationType);
   const color = getOperationColor(operation.operationType);
@@ -68,15 +69,23 @@ const OperationCard = ({ operation, onAddChild, disabledAdd }: OperationCardProp
         </Col>
 
         <Col>
-          <Button
-            type="dashed"
-            size="large"
-            icon={<Plus className="w-4 h-4" />}
-            onClick={() => onAddChild(operation.id)}
-            disabled={disabledAdd}
-          >
-            Add Operation
-          </Button>
+          <Space>
+            <Button
+              type="text"
+              icon={<Pencil className="w-4 h-4" />}
+              onClick={() => onEdit(operation)}
+              disabled={disabledAdd}
+            />
+            <Button
+              type="dashed"
+              size="large"
+              icon={<Plus className="w-4 h-4" />}
+              onClick={() => onAddChild(operation.id)}
+              disabled={disabledAdd}
+            >
+              Add Operation
+            </Button>
+          </Space>
         </Col>
       </Row>
     </Card>

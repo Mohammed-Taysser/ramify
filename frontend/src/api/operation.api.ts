@@ -8,6 +8,7 @@ class OperationService extends EntityService<
   constructor() {
     super('operation');
   }
+ 
 }
 
 export default new OperationService();

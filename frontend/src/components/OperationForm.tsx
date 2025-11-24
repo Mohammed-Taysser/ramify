@@ -5,8 +5,14 @@ import { useState } from "react";
 
 interface OperationFormProps {
   currentValue: number;
+  initialValues?: {
+    type: OperationType;
+    operand: number;
+    title?: string;
+  };
   onSubmit: (type: OperationType, operand: number, title?: string) => void;
   onCancel: () => void;
+  mode?: 'create' | 'edit';
 }
 
 const operations = [
@@ -16,10 +22,10 @@ const operations = [
   { type: "DIVIDE", icon: Divide, label: "Divide", symbol: "÷" },
 ];
 
-const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFormProps) => {
-  const [selectedType, setSelectedType] = useState<OperationType>("ADD");
-  const [operand, setOperand] = useState<number>(0);
-  const [title, setTitle] = useState<string>("");
+const OperationForm = ({ currentValue, onSubmit, onCancel, initialValues, mode = 'create' }: OperationFormProps) => {
+  const [selectedType, setSelectedType] = useState<OperationType>(initialValues?.type || "ADD");
+  const [operand, setOperand] = useState<number>(initialValues?.operand || 0);
+  const [title, setTitle] = useState<string>(initialValues?.title || "");
 
   const calculatePreview = () => {
     switch (selectedType) {
@@ -45,7 +51,7 @@ const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFormProps)
 
   return (
     <Card style={{ marginTop: 16 }}>
-      <Typography.Title level={4}>Add New Operation</Typography.Title>
+      <Typography.Title level={4}>{mode === 'edit' ? 'Edit Operation' : 'Add New Operation'}</Typography.Title>
 
       <Space direction="vertical" style={{ width: "100%" }}>
         <div>
@@ -115,7 +121,7 @@ const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFormProps)
             onClick={handleSubmit}
             disabled={selectedType === "DIVIDE" && operand === 0}
           >
-            Add Operation
+            {mode === 'edit' ? 'Update Operation' : 'Add Operation'}
           </Button>
         </Space>
       </Space>
