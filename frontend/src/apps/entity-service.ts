@@ -54,14 +54,14 @@ abstract class EntityService<
   }
 
   update(id: number, payload: Partial< UpdatePayload>) {
-    return this.client.put<AxiosSuccessResponse<T>>(
+    return this.client.patch<AxiosSuccessResponse<T>>(
       `${this.endpoint}/${id}/`,
       payload
     );
   }
 
   updateForm(id: number, payload: Partial< UpdatePayload>) {
-    return this.client.putForm<AxiosSuccessResponse<T>>(
+    return this.client.patchForm<AxiosSuccessResponse<T>>(
       `${this.endpoint}/${id}/`,
       payload
     );

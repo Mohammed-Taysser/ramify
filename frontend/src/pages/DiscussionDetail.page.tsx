@@ -4,7 +4,7 @@ import { SITEMAP } from '@/apps/config';
 import DiscussionTree from '@/components/DiscussionTree';
 import OperationForm from '@/components/OperationForm';
 import useApiMessage from '@/hooks/useApiMessage';
-import { buildOperationTree } from '@/utils/tree.utils';
+import { buildOperationTree, type TreeOperation } from '@/utils/tree.utils';
 import { Button, Card, Col, Empty, Modal, Row, Skeleton, Space, Tag, Typography } from 'antd';
 import { ArrowLeft, Calculator, MessageSquare, Plus } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -17,15 +17,13 @@ const DiscussionDetail = () => {
 
   const { displayErrorMessages } = useApiMessage();
 
-
-
   const [showOperationForm, setShowOperationForm] = useState(false);
   const [selectedParentId, setSelectedParentId] = useState<number | null>();
 
   const [isLoading, setIsLoading] = useState(true);
   const [fetchedDiscussion, setFetchedDiscussion] = useState<Maybe<Discussion>>();
 
-  const [editingOperation, setEditingOperation] = useState<Operation | null>(null);
+  const [editingOperation, setEditingOperation] = useState<TreeOperation | null>(null);
 
   useEffect(() => {
     if (discussionId && !Number.isNaN(Number(discussionId))) {
@@ -86,7 +84,7 @@ const DiscussionDetail = () => {
     }
   };
 
-  const handleEditOperation = (operation: Operation) => {
+  const handleEditOperation = (operation: TreeOperation) => {
     setEditingOperation(operation);
     setShowOperationForm(true);
   };
@@ -113,6 +111,7 @@ const DiscussionDetail = () => {
 
       setShowOperationForm(false);
       setEditingOperation(null);
+      setSelectedParentId(undefined); // Reset parent ID
       fetchDiscussionByID(fetchedDiscussion.id);
     } catch (error) {
       displayErrorMessages(error);
@@ -127,22 +126,22 @@ const DiscussionDetail = () => {
     setShowOperationForm(true);
   };
 
-
-
-
-
   const operationTree = useMemo(() => {
     if (!fetchedDiscussion?.operations) return [];
     return buildOperationTree(fetchedDiscussion.operations);
   }, [fetchedDiscussion]);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: '#f5f5f5' }}
+    >
       <Modal
         open={showOperationForm}
         onCancel={() => {
           setShowOperationForm(false);
           setEditingOperation(null);
+          setSelectedParentId(undefined);
         }}
         footer={null}
       >
@@ -150,7 +149,7 @@ const DiscussionDetail = () => {
           currentValue={
             editingOperation
               ? editingOperation.beforeValue
-              : selectedParentId === null
+              : selectedParentId === null || selectedParentId === undefined
                 ? fetchedDiscussion?.startingValue || 0
                 : fetchedDiscussion?.operations.find((op) => op.id === selectedParentId)?.afterValue || 0
           }
@@ -168,6 +167,7 @@ const DiscussionDetail = () => {
           onCancel={() => {
             setShowOperationForm(false);
             setEditingOperation(null);
+            setSelectedParentId(undefined);
           }}
         />
       </Modal>
@@ -225,12 +225,7 @@ const DiscussionDetail = () => {
                     <Text type="secondary">•</Text>
                     <Text
                       strong
-                      className={`font-mono text-xl ${currentValue > fetchedDiscussion.startingValue
-                        ? '!text-green-500'
-                        : currentValue < fetchedDiscussion.startingValue
-                          ? '!text-red-500'
-                          : '!text-gray-500'
-                        }`}
+                      className={`text-xl font-mono transition-colors duration-300`}
                     >
                       Current: {currentValue.toFixed(2)}
                     </Text>
