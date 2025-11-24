@@ -32,4 +32,11 @@ operationRoutes.post(
   controller.createOperation
 );
 
+operationRoutes.patch(
+  '/:operationId',
+  authenticateMiddleware,
+  validateRequest(validator.updateOperationSchema),
+  controller.updateOperation
+);
+
 export default operationRoutes;

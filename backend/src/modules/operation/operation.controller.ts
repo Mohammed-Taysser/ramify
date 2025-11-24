@@ -1,15 +1,17 @@
 import { Request, Response } from 'express';
 import { Prisma } from 'prisma/generated';
 
+import operationService from './operation.service';
 import {
   CreateOperationInput,
   GetOperationByIdParams,
   GetOperationsListQuery,
+  UpdateOperationInput,
 } from './operation.validator';
 
 import prisma from '@/apps/prisma';
 import { AuthenticatedRequest } from '@/types/import';
-import { NotFoundError } from '@/utils/errors.utils';
+import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
 import { sendPaginatedResponse, sendSuccessResponse } from '@/utils/response.utils';
 
 async function getOperations(request: Request, response: Response) {
@@ -234,8 +236,93 @@ async function createOperation(request: Request, response: Response) {
   });
 }
 
+/**
+ * Update an existing operation and recalculate all descendants
+ * Uses transaction to ensure atomic updates
+ */
+const updateOperation = async (request: Request, response: Response): Promise<void> => {
+  const { operationId } = request.params as unknown as { operationId: string };
+  const body = request.body as UpdateOperationInput;
+
+  const result = await prisma.$transaction(async (tx) => {
+    // 1. Fetch current operation with discussion
+    const operation = await tx.operation.findUnique({
+      where: { id: Number(operationId) },
+      include: { discussion: true },
+    });
+
+    if (!operation) {
+      throw new NotFoundError('Operation not found');
+    }
+
+    // 2. Check if discussion is ended
+    if (operation.discussion.isEnded) {
+      throw new BadRequestError('Cannot update operation in ended discussion');
+    }
+
+    // 3. Determine new values (use provided or keep existing)
+    const newValue = body.value ?? operation.value;
+    const newType = body.operationType ?? operation.operationType;
+    const newTitle = body.title ?? operation.title;
+
+    // 4. Validate division by zero
+    if (newType === 'DIVIDE' && newValue === 0) {
+      throw new BadRequestError('Cannot divide by zero');
+    }
+
+    // 5. Get parent's afterValue (or discussion starting value for root ops)
+    const parent = operation.parentId
+      ? await tx.operation.findUnique({
+          where: { id: operation.parentId },
+          select: { afterValue: true },
+        })
+      : { afterValue: operation.discussion.startingValue };
+
+    if (!parent) {
+      throw new NotFoundError('Parent operation not found');
+    }
+
+    // 6. Calculate new afterValue for this operation
+    const newAfterValue = operationService.calculateOperation(parent.afterValue, newType, newValue);
+
+    // 7. Update the operation itself
+    const updatedOperation = await tx.operation.update({
+      where: { id: Number(operationId) },
+      data: {
+        value: newValue,
+        operationType: newType,
+        title: newTitle,
+        beforeValue: parent.afterValue,
+        afterValue: newAfterValue,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // 8. Recalculate all descendants
+    const affectedCount = await operationService.recalculateOperationTree(Number(operationId), tx);
+
+    return { operation: updatedOperation, affectedCount };
+  });
+
+  sendSuccessResponse({
+    response,
+    message: `Operation updated. ${result.affectedCount} descendant(s) recalculated.`,
+    statusCode: 200,
+    data: result.operation,
+  });
+};
+
 const operationController = {
   createOperation,
+  updateOperation,
   getOperationById,
   getOperations,
   getOperationsList,

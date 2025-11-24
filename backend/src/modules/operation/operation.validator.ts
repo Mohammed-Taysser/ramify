@@ -30,16 +30,45 @@ const createOperationSchema = {
     }),
 };
 
+const updateOperationSchema = {
+  params: z.object({
+    operationId: z.coerce.number().positive().int(),
+  }),
+  body: z
+    .object({
+      value: z.coerce.number().optional(),
+      operationType: z.enum(OPERATION_TYPE).optional(),
+      title: z.string().min(1).max(200).optional(),
+    })
+    .refine(
+      (data) => {
+        return (
+          data.value !== undefined || data.operationType !== undefined || data.title !== undefined
+        );
+      },
+      {
+        message: 'At least one field (value, operationType, or title) must be provided',
+      }
+    ),
+};
+
 type CreateOperationInput = z.infer<typeof createOperationSchema.body>;
+type UpdateOperationInput = z.infer<typeof updateOperationSchema.body>;
 type GetOperationsListQuery = z.infer<typeof getOperationsListSchema.query>;
 type GetOperationByIdParams = z.infer<typeof getOperationByIdSchema.params>;
 
 const operationValidator = {
   createOperationSchema,
+  updateOperationSchema,
   getOperationsListSchema,
   getOperationByIdSchema,
 };
 
-export type { CreateOperationInput, GetOperationByIdParams, GetOperationsListQuery };
+export type {
+  CreateOperationInput,
+  GetOperationByIdParams,
+  GetOperationsListQuery,
+  UpdateOperationInput,
+};
 
 export default operationValidator;

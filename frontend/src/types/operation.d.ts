@@ -19,6 +19,9 @@ interface CreateOperationPayload {
   title?: string;
 }
 
-interface UpdateOperationPayload extends CreateOperationPayload {
+interface UpdateOperationPayload {
   id: number;
+  value?: number;
+  operationType?: OperationType;
+  title?: string;
 }

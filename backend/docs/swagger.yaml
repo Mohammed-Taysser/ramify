@@ -788,6 +788,69 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+    patch:
+      summary: Update an operation and recalculate descendants
+      description: Updates an operation's value, type, or title and automatically recalculates all descendant operations in the tree using a database transaction.
+      tags:
+        - Operations
+      parameters:
+        - in: path
+          name: operationId
+          required: true
+          schema:
+            type: integer
+          description: ID of the operation to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: number
+                  description: New value for the operation
+                  example: 150
+                operationType:
+                  type: string
+                  enum: [ADD, SUBTRACT, MULTIPLY, DIVIDE]
+                  description: New operation type
+                  example: MULTIPLY
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                  description: New custom title
+                  example: Updated investment
+              description: At least one field must be provided
+      responses:
+        '200':
+          description: Operation updated successfully with descendant recalculation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 'Operation updated. 3 descendant(s) recalculated.'
+                      data:
+                        $ref: '#/components/schemas/Operation'
+        '400':
+          description: Bad request (e.g., division by zero, no fields provided, discussion ended)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Operation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     SuccessResponse:
