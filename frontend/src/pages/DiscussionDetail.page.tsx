@@ -33,7 +33,7 @@ const DiscussionDetail = () => {
 
   const fetchDiscussionByID = async (discussionId: number) => {
     setIsLoading(true);
-    
+
     try {
       const response = await discussionApi.getById(discussionId);
       setFetchedDiscussion(response.data.data);
@@ -87,7 +87,7 @@ const DiscussionDetail = () => {
     }
   };
 
-  const handleOperationSubmit = async (type: OperationType, operand: number) => {
+  const handleOperationSubmit = async (type: OperationType, operand: number, title?: string) => {
     if (!fetchedDiscussion) return;
 
     try {
@@ -96,6 +96,7 @@ const DiscussionDetail = () => {
         value: operand,
         parentId: selectedParentId,
         discussionId: fetchedDiscussion.id,
+        title,
       });
 
       setShowOperationForm(false);

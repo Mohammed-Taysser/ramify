@@ -208,7 +208,7 @@ async function createOperation(request: Request, response: Response) {
     data: {
       discussionId,
       parentId: body.parentId || null,
-      title: `${body.operation} ${body.value}`,
+      title: body.title || `${body.operation} ${body.value}`,
       operationType: body.operation,
       value: body.value,
       beforeValue,

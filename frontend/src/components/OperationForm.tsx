@@ -1,11 +1,11 @@
-import { Button, Card, InputNumber, Radio, Space, Typography } from "antd";
+import { Button, Card, Input, InputNumber, Radio, Space, Typography } from "antd";
 import { Divide, Minus, Plus, X } from "lucide-react";
 import { useState } from "react";
 
 
 interface OperationFormProps {
   currentValue: number;
-  onSubmit: (type: OperationType, operand: number) => void;
+  onSubmit: (type: OperationType, operand: number, title?: string) => void;
   onCancel: () => void;
 }
 
@@ -19,6 +19,7 @@ const operations = [
 const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFormProps) => {
   const [selectedType, setSelectedType] = useState<OperationType>("ADD");
   const [operand, setOperand] = useState<number>(0);
+  const [title, setTitle] = useState<string>("");
 
   const calculatePreview = () => {
     switch (selectedType) {
@@ -39,7 +40,7 @@ const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFormProps)
     if (operand === 0 && selectedType === "DIVIDE") {
       return;
     }
-    onSubmit(selectedType, operand);
+    onSubmit(selectedType, operand, title || undefined);
   };
 
   return (
@@ -74,8 +75,18 @@ const OperationForm = ({ currentValue, onSubmit, onCancel }: OperationFormProps)
             value={operand}
             onChange={(value) => setOperand(value || 0)}
             placeholder="Enter number..."
+            className="w-full"
+          />
+        </div>
 
-            style={{ width: "100%" }}
+        <div>
+          <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>Title (Optional)</Typography.Text>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g., Initial investment, Monthly deduction..."
+            maxLength={200}
+            className="w-full"
           />
         </div>
 

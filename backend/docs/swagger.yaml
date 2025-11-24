@@ -709,8 +709,20 @@ paths:
                   example: ADD
                 value:
                   type: number
+                  example: 10
                 parentId:
                   type: number
+                  nullable: true
+                  example: null
+                discussionId:
+                  type: number
+                  example: 1
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                  description: Optional custom title for the operation
+                  example: Initial investment
       responses:
         '201':
           description: Operation created successfully

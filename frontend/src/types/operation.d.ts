@@ -16,6 +16,7 @@ interface CreateOperationPayload {
   value: number;
   parentId?: number | null;
   discussionId?: number;
+  title?: string;
 }
 
 interface UpdateOperationPayload extends CreateOperationPayload {

@@ -24,7 +24,15 @@ const OperationCard = ({ operation, onAddChild, disabledAdd }: OperationCardProp
       <Row justify="space-between" align="middle" gutter={[16, 16]}>
         <Col>
           <div>
+            {operation.title && (
+              <Typography.Text type="secondary" className="text-xs block mb-1">
+                {operation.title}
+              </Typography.Text>
+            )}
             <Space>
+              <span className="text-base text-gray-500 font-mono">
+                {operation.beforeValue.toFixed(2)}
+              </span>
               <span
                 className="text-lg font-semibold font-mono"
                 style={{
