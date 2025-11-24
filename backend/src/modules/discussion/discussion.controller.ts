@@ -10,7 +10,7 @@ import {
 
 import prisma from '@/apps/prisma';
 import { AuthenticatedRequest } from '@/types/import';
-import { NotFoundError } from '@/utils/errors.utils';
+import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
 import { sendPaginatedResponse, sendSuccessResponse } from '@/utils/response.utils';
 
 async function getDiscussions(request: Request, response: Response) {
@@ -339,7 +339,7 @@ async function endDiscussion(request: Request, response: Response) {
   }
 
   if (discussion.isEnded) {
-    return response.status(400).json({ error: 'Discussion is already ended' });
+    throw new BadRequestError('Discussion is already ended');
   }
 
   const updatedDiscussion = await prisma.discussion.update({

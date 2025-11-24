@@ -147,7 +147,7 @@ async function createOperation(request: Request, response: Response) {
   if (body.parentId === null || body.parentId === undefined) {
     // Root operation: get starting value from discussion
     if (!body.discussionId) {
-      return response.status(400).json({ error: 'discussionId is required for root operations' });
+      throw new BadRequestError('discussionId is required for root operations');
     }
 
     const discussion = await prisma.discussion.findUnique({
@@ -181,12 +181,12 @@ async function createOperation(request: Request, response: Response) {
   });
 
   if (discussion?.isEnded) {
-    return response.status(400).json({ error: 'Cannot add operation to an ended discussion' });
+    throw new BadRequestError('Cannot add operation to an ended discussion');
   }
 
   // Validate division by zero
   if (body.operation === 'DIVIDE' && body.value === 0) {
-    return response.status(400).json({ error: 'Cannot divide by zero' });
+    throw new BadRequestError('Cannot divide by zero');
   }
 
   // Calculate afterValue based on operation type
