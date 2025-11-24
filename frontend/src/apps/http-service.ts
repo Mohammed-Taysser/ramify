@@ -1,4 +1,4 @@
-import axios, { AxiosError, type AxiosInstance } from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 import { API_ENDPOINT, LOCAL_STORAGE_KEYS, SITEMAP } from './config';
 import routes from './routes';
 
@@ -36,14 +36,13 @@ class HTTPService {
         return response;
       },
       async (error) => {
-        const refreshToken = localStorage.getItem(
-          LOCAL_STORAGE_KEYS.refreshToken
-        );
+        const refreshToken = localStorage.getItem(LOCAL_STORAGE_KEYS.refreshToken);
 
+        // Check if this is a 401 error and NOT the refresh token endpoint itself
         const canRefresh =
           error.response?.status === 401 &&
           refreshToken &&
-          error.config.url !== 'token/refresh/';
+          error.config.url !== 'auth/refresh-token';
 
         if (canRefresh) {
           try {
@@ -51,25 +50,28 @@ class HTTPService {
             const { default: authApi } = await import('@/api/auth.api');
             const response = await authApi.refreshToken(refreshToken);
 
-            localStorage.setItem(
-              LOCAL_STORAGE_KEYS.accessToken,
-              response.data.data.accessToken
-            );
-          } catch (err) {
-            const errorResponse = err as AxiosError<APIResponseError>;
+            localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, response.data.data.accessToken);
 
-            if (errorResponse?.response?.data) {
-              localStorage.removeItem(LOCAL_STORAGE_KEYS.user);
-              localStorage.removeItem(LOCAL_STORAGE_KEYS.accessToken);
-              localStorage.removeItem(LOCAL_STORAGE_KEYS.refreshToken);
-
-              routes.navigate(SITEMAP.login.path);
-
-              return Promise.reject(errorResponse);
+            // Update refresh token if provided
+            if (response.data.data.refreshToken) {
+              localStorage.setItem(
+                LOCAL_STORAGE_KEYS.refreshToken,
+                response.data.data.refreshToken
+              );
             }
-          }
 
-          return this.client(error.config);
+            // Retry the original request with new token
+            return this.client(error.config);
+          } catch (err) {
+            // Refresh failed - clear auth and redirect to login
+            localStorage.removeItem(LOCAL_STORAGE_KEYS.user);
+            localStorage.removeItem(LOCAL_STORAGE_KEYS.accessToken);
+            localStorage.removeItem(LOCAL_STORAGE_KEYS.refreshToken);
+
+            routes.navigate(SITEMAP.login.path);
+
+            return Promise.reject(err);
+          }
         }
 
         if (
