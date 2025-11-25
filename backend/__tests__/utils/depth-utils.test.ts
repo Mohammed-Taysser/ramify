@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { calculateOperationDepth, MAX_TREE_DEPTH, validateTreeDepth } from '../depth.utils';
+import { calculateOperationDepth, MAX_TREE_DEPTH, validateTreeDepth } from '@/utils/depth.utils';
 
 describe('Depth Utilities', () => {
   describe('calculateOperationDepth', () => {

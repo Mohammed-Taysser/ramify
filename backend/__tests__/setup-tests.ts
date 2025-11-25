@@ -3,10 +3,11 @@
  * Runs before all tests
  */
 
-// Mock environment variables
+// Set NODE_ENV before loading config
 process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test-secret-key';
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
+
+// Config will automatically load .env.test based on NODE_ENV
+// No need to manually set environment variables here
 
 // Set test timeout
 jest.setTimeout(10000);

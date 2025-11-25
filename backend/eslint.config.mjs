@@ -1,15 +1,15 @@
 import js from '@eslint/js';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
 import json from '@eslint/json';
 import prettierConfig from 'eslint-config-prettier';
-import prettierPlugin from 'eslint-plugin-prettier';
-import { defineConfig } from 'eslint/config';
-import importPlugin from 'eslint-plugin-import';
-import checkFilePlugin from 'eslint-plugin-check-file';
 import boundariesPlugin from 'eslint-plugin-boundaries';
-import sonarjs from 'eslint-plugin-sonarjs';
+import checkFilePlugin from 'eslint-plugin-check-file';
+import importPlugin from 'eslint-plugin-import';
+import prettierPlugin from 'eslint-plugin-prettier';
 import securityNode from 'eslint-plugin-security-node';
+import sonarjs from 'eslint-plugin-sonarjs';
+import { defineConfig } from 'eslint/config';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   // Base JS rules
@@ -117,11 +117,13 @@ export default defineConfig([
       ],
 
       // Folder Naming Convention: enforce kebab-case for src folders
+      // Exception: Allow __tests__ folders (Jest convention)
       'check-file/folder-naming-convention': [
         'error',
         {
           // enforce kebab-case for modules, middleware, services, utils, etc.
-          'src/**': 'KEBAB_CASE',
+          // but allow __tests__ folders
+          'src/**/!(__tests__)': 'KEBAB_CASE',
         },
       ],
 

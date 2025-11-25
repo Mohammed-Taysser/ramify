@@ -1,8 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import Decimal from 'decimal.js';
 
-import operationService from '../operation.service';
-
+import operationService from '@/modules/operation/operation.service';
 import { BadRequestError } from '@/utils/errors.utils';
 
 describe('Operation Service', () => {
