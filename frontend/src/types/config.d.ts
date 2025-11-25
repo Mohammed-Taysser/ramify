@@ -3,8 +3,10 @@ type PageKey =
   | 'register'
   | 'discussions'
   | 'homepage'
-  |'unauthorized'
-  |'pageNotFound';
+  | 'unauthorized'
+  | 'pageNotFound'
+  | 'portfolio'
+  | 'switchUser';
 
 interface PageEntry {
   path: string;
@@ -15,4 +17,3 @@ interface PageEntry {
 type SiteMap = {
   [key in PageKey]: PageEntry;
 };
- 

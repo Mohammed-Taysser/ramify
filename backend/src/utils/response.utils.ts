@@ -26,9 +26,7 @@ function sendSuccessResponse<T>(params: SuccessResponseParams<T>) {
   return response.status(statusCode).json({
     success: true,
     message,
-    data: {
-      ...data,
-    },
+    data,
   });
 }
 

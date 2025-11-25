@@ -21,16 +21,24 @@ const refreshTokenSchema = {
   }),
 };
 
+const switchUserSchema = {
+  body: z.object({
+    userId: z.number().int().positive(),
+  }),
+};
+
 type RegisterInput = z.infer<typeof registerSchema.body>;
 type LoginInput = z.infer<typeof loginSchema.body>;
 type RefreshTokenInput = z.infer<typeof refreshTokenSchema.body>;
+type SwitchUserInput = z.infer<typeof switchUserSchema.body>;
 
 const authValidator = {
   loginSchema,
   refreshTokenSchema,
   registerSchema,
+  switchUserSchema,
 };
 
-export type { LoginInput, RefreshTokenInput, RegisterInput };
+export type { LoginInput, RefreshTokenInput, RegisterInput, SwitchUserInput };
 
 export default authValidator;

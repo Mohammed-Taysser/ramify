@@ -7,7 +7,8 @@ const PAGES = {
   homepage: lazy(() => import('@/pages/Home.page')),
   register: lazy(() => import('@/pages/Register.page')),
   discussionDetail: lazy(() => import('@/pages/DiscussionDetail.page')),
+  portfolio: lazy(() => import('@/pages/Portfolio.page')),
+  switchUser: lazy(() => import('@/pages/SwitchUser.page')),
 };
- 
 
 export default PAGES;

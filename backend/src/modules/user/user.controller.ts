@@ -106,6 +106,7 @@ async function getUsersList(request: Request, response: Response) {
     select: {
       id: true,
       name: true,
+      email: true,
     },
     where: filters,
   });

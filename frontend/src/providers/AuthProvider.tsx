@@ -1,4 +1,4 @@
- 
+
 
 import authApi from '@/api/auth.api';
 import { LOCAL_STORAGE_KEYS } from '@/apps/config';
@@ -46,7 +46,14 @@ function AuthProvider(props: Readonly<PropsWithChildren>) {
     }
   };
 
-  const value = useMemo(() => ({ user, setUser }), [user]);
+  const logout = () => {
+    localStorage.removeItem(LOCAL_STORAGE_KEYS.accessToken);
+    localStorage.removeItem(LOCAL_STORAGE_KEYS.refreshToken);
+    localStorage.removeItem(LOCAL_STORAGE_KEYS.user);
+    setUser(undefined);
+  };
+
+  const value = useMemo(() => ({ user, setUser, logout }), [user]);
 
   return (
     <AuthContext.Provider value={value}>

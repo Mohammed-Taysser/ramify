@@ -1,8 +1,8 @@
-import { Home, LogIn, MessageSquare, SearchX, ShieldAlert, UserPlus } from 'lucide-react';
-import packageInfo from '../../package.json';
 import FAVICON from '@/assets/images/icons/favicon.png';
 import ENV from '@/utils/env.utils';
 import { theme, type ThemeConfig } from 'antd';
+import { Home, LogIn, MessageSquare, SearchX, ShieldAlert, UserPlus } from 'lucide-react';
+import packageInfo from '../../package.json';
 
 // Environment Variables
 const { API_ENDPOINT, SERVER_URL } = ENV;
@@ -59,8 +59,6 @@ const DARK_ANT_THEME: ThemeConfig = {
 const ROUTE_CREATE_SLUG = 'create';
 const ROUTE_DETAILS_SLUG = 'info';
 
-
-
 const SITEMAP: SiteMap = {
   homepage: {
     path: '/',
@@ -92,9 +90,17 @@ const SITEMAP: SiteMap = {
     icon: SearchX,
     label: 'page-not-found',
   },
+  portfolio: {
+    path: '/portfolio',
+    icon: UserPlus, // Using UserPlus as a placeholder, maybe User would be better if available, but sticking to existing imports for now or adding User
+    label: 'portfolio',
+  },
+  switchUser: {
+    path: '/switch-user',
+    icon: UserPlus,
+    label: 'switch-user',
+  },
 };
-
-
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -103,25 +109,23 @@ const TABLE_PAGE_SIZE_BIGGER_OPTIONS: number[] = [1000, 2000, 3000, 5000];
 const TABLE_PAGE_BIGGER_SIZE: number = 1000;
 const TABLE_PAGE_SIZE: number = 25;
 
-
-
 export {
   API_ENDPOINT,
   COMPANY_NAME,
+  DARK_ANT_THEME,
+  DEFAULT_THEME,
   FAVICON,
+  LIGHT_ANT_THEME,
   LOCAL_STORAGE_KEYS,
   MAIN_COLOR,
-  MAIN_FONT, MIN_PASSWORD_LENGTH,
+  MAIN_FONT,
+  MIN_PASSWORD_LENGTH,
+  ROUTE_CREATE_SLUG,
+  ROUTE_DETAILS_SLUG,
   SERVER_URL,
   SITEMAP,
   TABLE_PAGE_BIGGER_SIZE,
   TABLE_PAGE_SIZE,
   TABLE_PAGE_SIZE_BIGGER_OPTIONS,
   TABLE_PAGE_SIZE_OPTIONS,
-  DEFAULT_THEME,
-  DARK_ANT_THEME,
-  LIGHT_ANT_THEME,
-  ROUTE_CREATE_SLUG,
-  ROUTE_DETAILS_SLUG
 };
-

@@ -15,4 +15,6 @@ authRoutes.post(
   controller.refreshToken
 );
 
+authRoutes.post('/switch-user', validateRequest(validator.switchUserSchema), controller.switchUser);
+
 export default authRoutes;

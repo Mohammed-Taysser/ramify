@@ -164,6 +164,34 @@ paths:
                           refreshToken:
                             type: string
 
+  /auth/switch-user:
+    post:
+      tags: [Auth]
+      summary: Switch to another user (Dev/Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId:
+                  type: integer
+                  example: 1
+      responses:
+        200:
+          description: Switched user successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuthResponse'
+
   /users/me:
     get:
       tags: [Users]

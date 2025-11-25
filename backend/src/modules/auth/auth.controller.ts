@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { LoginInput, RefreshTokenInput, RegisterInput } from './auth.validator';
+import { LoginInput, RefreshTokenInput, RegisterInput, SwitchUserInput } from './auth.validator';
 
 import prisma from '@/apps/prisma';
 import tokenService from '@/services/token.service';
@@ -98,10 +98,37 @@ function refreshToken(request: Request<unknown, unknown, RefreshTokenInput>, res
   }
 }
 
+async function switchUser(request: Request<unknown, unknown, SwitchUserInput>, response: Response) {
+  const { userId } = request.body;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new BadRequestError('User not found');
+  }
+
+  const payload = { id: user.id, email: user.email };
+
+  const accessToken = tokenService.signAccessToken(payload);
+  const refreshToken = tokenService.signRefreshToken(payload);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, ...restUser } = user;
+
+  sendSuccessResponse({
+    response,
+    message: 'Switched user successfully',
+    data: { accessToken, refreshToken, user: restUser },
+  });
+}
+
 const authController = {
   login,
   refreshToken,
   register,
+  switchUser,
 };
 
 export default authController;

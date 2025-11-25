@@ -1,10 +1,11 @@
 import { SITEMAP } from '@/apps/config';
+import AuthContext from '@/context/auth.context';
 import { useContext, type PropsWithChildren } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import AuthContext from '@/context/auth.context';
- 
+import MainLayout from '../MainLayout';
+
 const ProtectedAuthRoutes = (props: PropsWithChildren) => {
-  const { children,   } = props;
+  const { children, } = props;
 
   const authContext = useContext(AuthContext);
   const location = useLocation();
@@ -17,9 +18,9 @@ const ProtectedAuthRoutes = (props: PropsWithChildren) => {
       />
     );
   }
- 
 
-  return children;
+
+  return <MainLayout>{children}</MainLayout>;
 };
 
 export default ProtectedAuthRoutes;
