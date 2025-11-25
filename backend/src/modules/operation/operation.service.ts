@@ -1,27 +1,28 @@
+import Decimal from 'decimal.js';
 import type { OPERATION_TYPE, Operation, Prisma } from 'prisma/generated';
 
 import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
 
 /**
- * Calculate the result of an operation
+ * Calculate the result of an operation using Decimal for precision
  */
 function calculateOperation(
-  beforeValue: number,
+  beforeValue: Decimal,
   operationType: OPERATION_TYPE,
-  value: number
-): number {
+  value: Decimal
+): Decimal {
   switch (operationType) {
     case 'ADD':
-      return beforeValue + value;
+      return beforeValue.plus(value);
     case 'SUBTRACT':
-      return beforeValue - value;
+      return beforeValue.minus(value);
     case 'MULTIPLY':
-      return beforeValue * value;
+      return beforeValue.times(value);
     case 'DIVIDE':
-      if (value === 0) {
+      if (value.isZero()) {
         throw new BadRequestError('Cannot divide by zero');
       }
-      return beforeValue / value;
+      return beforeValue.dividedBy(value);
     default:
       throw new BadRequestError(`Invalid operation type: ${operationType}`);
   }
@@ -124,12 +125,15 @@ export async function recalculateOperationTree(
       throw new NotFoundError(`Parent operation ${op.parentId} not found`);
     }
 
-    const newAfterValue = calculateOperation(parent.afterValue, op.operationType, op.value);
+    // Convert Prisma Decimal to decimal.js Decimal
+    const parentAfterValue = new Decimal(parent.afterValue.toString());
+    const opValue = new Decimal(op.value.toString());
+    const newAfterValue = calculateOperation(parentAfterValue, op.operationType, opValue);
 
     await tx.operation.update({
       where: { id: op.id },
       data: {
-        beforeValue: parent.afterValue,
+        beforeValue: parentAfterValue,
         afterValue: newAfterValue,
       },
     });

@@ -30,7 +30,7 @@ model Discussion {
   createdBy     Int
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  startingValue Float
+  startingValue Decimal     @db.Decimal(20, 10)
   isEnded       Boolean     @default(false)
   endedAt       DateTime?
   operations    Operation[]
@@ -43,9 +43,10 @@ model Operation {
   parentId      Int?
   title         String?
   operationType OPERATION_TYPE
-  value         Float
-  beforeValue   Float          @default(0)
-  afterValue    Float          @default(0)
+  value         Decimal        @db.Decimal(20, 10)
+  beforeValue   Decimal        @default(0) @db.Decimal(20, 10)
+  afterValue    Decimal        @default(0) @db.Decimal(20, 10)
+  depth         Int            @default(0)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   user          User?          @relation(fields: [createdBy], references: [id])

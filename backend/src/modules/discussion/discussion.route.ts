@@ -4,6 +4,7 @@ import controller from './discussion.controller';
 import validator from './discussion.validator';
 
 import authenticateMiddleware from '@/middleware/authenticate.middleware';
+import { creationRateLimiter } from '@/middleware/rate-limit.middleware';
 import validateRequest from '@/middleware/validate-request.middleware';
 
 const discussionRoutes = Router();
@@ -27,6 +28,7 @@ discussionRoutes.get(
 
 discussionRoutes.post(
   '/',
+  creationRateLimiter,
   authenticateMiddleware,
   validateRequest(validator.createDiscussionSchema),
   controller.createDiscussion

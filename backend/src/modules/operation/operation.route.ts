@@ -4,6 +4,7 @@ import controller from './operation.controller';
 import validator from './operation.validator';
 
 import authenticateMiddleware from '@/middleware/authenticate.middleware';
+import { creationRateLimiter } from '@/middleware/rate-limit.middleware';
 import validateRequest from '@/middleware/validate-request.middleware';
 
 const operationRoutes = Router();
@@ -27,6 +28,7 @@ operationRoutes.get(
 
 operationRoutes.post(
   '/',
+  creationRateLimiter,
   authenticateMiddleware,
   validateRequest(validator.createOperationSchema),
   controller.createOperation

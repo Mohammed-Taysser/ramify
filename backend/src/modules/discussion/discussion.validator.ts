@@ -2,6 +2,18 @@ import { z } from 'zod';
 
 import { basePaginationSchema } from '@/validations/base.validation';
 
+// Custom validation for decimal numbers
+const decimalNumber = z
+  .number()
+  .or(z.string().transform((val) => Number.parseFloat(val)))
+  .refine((val) => !Number.isNaN(val) && Number.isFinite(val), {
+    message: 'Value must be a valid finite number',
+  })
+  .refine((val) => Math.abs(val) <= Number.MAX_SAFE_INTEGER, {
+    message: 'Value exceeds safe number range',
+  })
+  .transform(Number);
+
 const getDiscussionsListSchema = {
   query: basePaginationSchema.extend({
     title: z.string().trim().min(3).max(100).optional(),
@@ -18,7 +30,7 @@ const getDiscussionByIdSchema = {
 const createDiscussionSchema = {
   body: z.object({
     title: z.string().trim().min(3).max(100),
-    startingValue: z.coerce.number(),
+    startingValue: decimalNumber,
   }),
 };
 
