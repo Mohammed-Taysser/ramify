@@ -41,8 +41,8 @@ Built for the **Ellty Full-Stack Developer Test Assignment**.
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/mohammed-taysser/ellty-second-task.git
-cd ellty-second-task
+git clone https://github.com/mohammed-taysser/ramify.git
+cd ramify
 ```
 
 ### 2. Setup Backend
@@ -125,7 +125,7 @@ For detailed setup instructions, troubleshooting, and API usage, see the [Setup 
 ## 🏗️ Project Structure
 
 ```
-ellty-second-task/
+ramify/
 ├── backend/
 │   ├── docs/              # Documentation
 │   ├── prisma/            # Database schema & migrations

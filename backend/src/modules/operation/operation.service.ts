@@ -1,28 +1,27 @@
-import Decimal from 'decimal.js';
-import type { OPERATION_TYPE, Operation, Prisma } from 'prisma/generated';
+import { OPERATION_TYPE, Operation, Prisma } from '@prisma';
 
 import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
 
 /**
- * Calculate the result of an operation using Decimal for precision
+ * Calculate the result of an operation
  */
 function calculateOperation(
-  beforeValue: Decimal,
+  beforeValue: number,
   operationType: OPERATION_TYPE,
-  value: Decimal
-): Decimal {
+  value: number
+): number {
   switch (operationType) {
-    case 'ADD':
-      return beforeValue.plus(value);
-    case 'SUBTRACT':
-      return beforeValue.minus(value);
-    case 'MULTIPLY':
-      return beforeValue.times(value);
+    case OPERATION_TYPE.ADD:
+      return beforeValue + value;
+    case OPERATION_TYPE.SUBTRACT:
+      return beforeValue - value;
+    case OPERATION_TYPE.MULTIPLY:
+      return beforeValue * value;
     case 'DIVIDE':
-      if (value.isZero()) {
+      if (value === 0) {
         throw new BadRequestError('Cannot divide by zero');
       }
-      return beforeValue.dividedBy(value);
+      return beforeValue / value;
     default:
       throw new BadRequestError(`Invalid operation type: ${operationType}`);
   }
@@ -118,23 +117,23 @@ export async function recalculateOperationTree(
   for (const op of sorted) {
     const parent = await tx.operation.findUnique({
       where: { id: op.parentId! },
-      select: { afterValue: true },
+      select: { afterValue: true, depth: true },
     });
 
     if (!parent) {
       throw new NotFoundError(`Parent operation ${op.parentId} not found`);
     }
 
-    // Convert Prisma Decimal to decimal.js Decimal
-    const parentAfterValue = new Decimal(parent.afterValue.toString());
-    const opValue = new Decimal(op.value.toString());
-    const newAfterValue = calculateOperation(parentAfterValue, op.operationType, opValue);
+    const parentAfterValue = parent.afterValue;
+    const newAfterValue = calculateOperation(parentAfterValue, op.operationType, op.value);
+    const newDepth = parent.depth + 1;
 
     await tx.operation.update({
       where: { id: op.id },
       data: {
         beforeValue: parentAfterValue,
         afterValue: newAfterValue,
+        depth: newDepth,
       },
     });
   }

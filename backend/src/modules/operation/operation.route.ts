@@ -11,17 +11,20 @@ const operationRoutes = Router();
 
 operationRoutes.get(
   '/list',
+  authenticateMiddleware,
   validateRequest(validator.getOperationsListSchema),
   controller.getOperationsList
 );
 operationRoutes.get(
   '/',
+  authenticateMiddleware,
   validateRequest(validator.getOperationsListSchema),
   controller.getOperations
 );
 
 operationRoutes.get(
   '/:operationId',
+  authenticateMiddleware,
   validateRequest(validator.getOperationByIdSchema),
   controller.getOperationById
 );

@@ -1,12 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import bcrypt from 'bcrypt';
-
-import { Operation, OPERATION_TYPE } from './generated';
+import { Operation, OPERATION_TYPE } from '@prisma';
+import { hashSync } from 'bcrypt';
 
 import CONFIG from '@/apps/config';
 import prisma from '@/apps/prisma';
+import { calculateOperation } from '@/modules/operation/operation.service';
 
 interface SeedData {
   users: Array<{ name: string; email: string }>;
@@ -28,26 +28,26 @@ interface SeedData {
  * - Creates discussions and operations from JSON data
  */
 async function main() {
-  console.debug('🌱 Starting database seed...\n');
+  console.log('🌱 Starting database seed...\n');
 
   // Load seed data from JSON
   const seedDataPath = join(__dirname, 'seed-data.json');
   const seedData: SeedData = JSON.parse(readFileSync(seedDataPath, 'utf-8'));
 
-  console.debug('✅ Loaded seed data from JSON\n');
+  console.log('✅ Loaded seed data from JSON\n');
 
   // Hash the seed password from config
-  const hashedPassword = await bcrypt.hash(CONFIG.SEED_USER_PASSWORD, 10);
+  const hashedPassword = hashSync(CONFIG.SEED_USER_PASSWORD, 10);
 
   // Clean existing data
-  console.debug('🧹 Cleaning existing data...');
+  console.log('🧹 Cleaning existing data...');
   await prisma.operation.deleteMany();
   await prisma.discussion.deleteMany();
   await prisma.user.deleteMany();
-  console.debug('✅ Existing data cleaned\n');
+  console.log('✅ Existing data cleaned\n');
 
   // Create demo users
-  console.debug('👥 Creating demo users...');
+  console.log('👥 Creating demo users...');
   const users = await Promise.all(
     seedData.users.map((userData) =>
       prisma.user.create({
@@ -62,7 +62,7 @@ async function main() {
   console.log('✅ Created', users.length, 'users\n');
 
   // Create discussions
-  console.debug('💬 Creating discussions...');
+  console.log('💬 Creating discussions...');
   const discussions = await Promise.all(
     seedData.discussions.map((discussionData) =>
       prisma.discussion.create({
@@ -77,7 +77,7 @@ async function main() {
   console.log('✅ Created', discussions.length, 'discussions\n');
 
   // Create operations
-  console.debug('🔢 Creating operations...');
+  console.log('🔢 Creating operations...');
   const operations: Operation[] = [];
 
   for (const operationData of seedData.operations) {
@@ -92,23 +92,12 @@ async function main() {
     }
 
     // Calculate afterValue based on operation type
-    let afterValue: number;
-    switch (operationData.operationType) {
-      case 'ADD':
-        afterValue = beforeValue + operationData.value;
-        break;
-      case 'SUBTRACT':
-        afterValue = beforeValue - operationData.value;
-        break;
-      case 'MULTIPLY':
-        afterValue = beforeValue * operationData.value;
-        break;
-      case 'DIVIDE':
-        afterValue = beforeValue / operationData.value;
-        break;
-      default:
-        afterValue = beforeValue;
-    }
+    // Calculate afterValue using shared service logic
+    const afterValue = calculateOperation(
+      beforeValue,
+      operationData.operationType as OPERATION_TYPE,
+      operationData.value
+    );
 
     const operation = await prisma.operation.create({
       data: {
@@ -130,13 +119,13 @@ async function main() {
 
   console.log('✅ Created', operations.length, 'operations\n');
 
-  console.debug('✨ Seed completed successfully!\n');
-  console.debug('📊 Summary:');
+  console.log('✨ Seed completed successfully!\n');
+  console.log('📊 Summary:');
   console.log('   - Users:', users.length);
   console.log('   - Discussions:', discussions.length);
   console.log('   - Operations:', operations.length);
-  console.debug(`\n🔐 Demo user credentials:`);
-  console.debug(`   Email: alice@demo.com (or any demo user)`);
+  console.log(`\n🔐 Demo user credentials:`);
+  console.log(`   Email: alice@demo.com (or any demo user)`);
   console.log('   Password:', CONFIG.SEED_USER_PASSWORD);
 }
 

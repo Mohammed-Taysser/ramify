@@ -1,7 +1,5 @@
 import { Response } from 'express';
 
-import { toNumberResponse } from './decimal.utils';
-
 interface SuccessResponseParams<T> {
   response: Response;
   statusCode?: number;
@@ -28,8 +26,7 @@ function sendSuccessResponse<T>(params: SuccessResponseParams<T>) {
   return response.status(statusCode).json({
     success: true,
     message,
-    // Convert Decimal values to numbers before sending to frontend
-    data: toNumberResponse(data),
+     data: data,
   });
 }
 
@@ -40,8 +37,7 @@ function sendPaginatedResponse<T>(params: PaginatedResponseParams<T>) {
     success: true,
     message,
     data: {
-      // Convert Decimal values to numbers before sending to frontend
-      data: toNumberResponse(data),
+       data: data,
       metadata,
     },
   });

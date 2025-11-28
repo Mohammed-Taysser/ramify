@@ -16,27 +16,24 @@ function logServerInfo(startTime: number) {
   const docsUrl = `http://localhost:${CONFIG.PORT}/docs`;
   const healthUrl = `http://localhost:${CONFIG.PORT}/health`;
 
-  const header = `${pkg.name} v${pkg.version} ready in ${duration} ms`;
+  const header = `${pkg.name.toUpperCase()} v${pkg.version} ready in ${duration} ms`;
 
-  console.debug('\n' + chalk.green.bold(header) + '\n');
+  console.log('\n' + chalk.green.bold(header) + '\n');
 
-  console.debug(chalk.gray('🕒 Started at:'), chalk.white(startedAt));
-  console.debug(chalk.gray('🧩 Node:      '), chalk.white(process.version));
-  console.debug(
+  console.log(chalk.gray('🕒 Started at:'), chalk.white(startedAt));
+  console.log(chalk.gray('🧩 Node:      '), chalk.white(process.version));
+  console.log(
     chalk.gray('🖥️  Platform:  '),
     chalk.white(`${os.type()} ${os.arch()} (${os.platform()})`)
   );
-  console.debug(`🔧 ${chalk.gray('ENV:')}        ${chalk.white(CONFIG.NODE_ENV.toUpperCase())}`);
-  console.debug();
+  console.log(`🔧 ${chalk.gray('ENV:')}        ${chalk.white(CONFIG.NODE_ENV.toUpperCase())}`);
+  console.log();
 
-  console.debug(chalk.green('➜') + '  Local:   ' + chalk.cyan(localUrl));
-  console.debug(chalk.yellow('➜') + '  Network: ' + chalk.white(networkUrl));
-  console.debug(chalk.gray('➜') + '  Docs:    ' + chalk.magenta(docsUrl));
-  console.debug(chalk.gray('➜') + '  Health:  ' + chalk.blue(healthUrl));
-  console.debug(
-    '\n' + chalk.gray('💡 Tip:'),
-    chalk.white('Press Ctrl+C to stop the server.') + '\n'
-  );
+  console.log(chalk.green('➜') + '  Local:   ' + chalk.cyan(localUrl));
+  console.log(chalk.yellow('➜') + '  Network: ' + chalk.white(networkUrl));
+  console.log(chalk.gray('➜') + '  Docs:    ' + chalk.magenta(docsUrl));
+  console.log(chalk.gray('➜') + '  Health:  ' + chalk.blue(healthUrl));
+  console.log('\n' + chalk.gray('💡 Tip:'), chalk.white('Press Ctrl+C to stop the server.') + '\n');
 }
 
 function getLocalIp(): string {

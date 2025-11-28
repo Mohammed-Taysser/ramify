@@ -1,7 +1,7 @@
 {
   "name": "ramify",
   "version": "1.0.0",
-  "main": "dist/app.js",
+  "main": "dist/server.js",
   "license": "MIT",
   "author": {
     "email": "mohammedtaysser983@gmail.com",
@@ -10,16 +10,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mohammed-taysser/ellty-second-task.git"
+    "url": "git+https://github.com/mohammed-taysser/ramify.git"
   },
   "scripts": {
     "build": "rimraf ./dist && tsc && tsc-alias",
-    "dev": "ts-node-dev --respawn --transpile-only --require tsconfig-paths/register --watch .env,docs/swagger.yaml src/app.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --require tsconfig-paths/register --watch .env,docs/swagger.yaml src/server.ts",
     "format:fix": "prettier --write .",
     "format": "prettier --check .",
-    "lint:fix": "eslint . --ext .ts --fix",
-    "lint": "eslint . --ext .ts",
-    "start": "node dist/app.js",
+    "lint:fix": "eslint ./src --ext .ts --fix",
+    "lint": "eslint ./src --ext .ts",
+    "start": "node dist/server.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -42,7 +42,6 @@
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.19",
-    "decimal.js": "^10.6.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",

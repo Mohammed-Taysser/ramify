@@ -35,30 +35,6 @@ When rate limit is exceeded:
 }
 ```
 
-## Decimal Precision
-
-All numeric values (`startingValue`, `value`, `beforeValue`, `afterValue`) use decimal precision to avoid floating-point errors.
-
-**Frontend receives:**
-
-```json
-{
-  "value": 0.3,
-  "beforeValue": 0.1,
-  "afterValue": 0.3
-}
-```
-
-**Not:**
-
-```json
-{
-  "value": "0.3" // Strings
-}
-```
-
-The backend automatically converts Prisma Decimal types to JavaScript numbers for API responses.
-
 ## Input Validation
 
 All numeric inputs are validated to:
@@ -89,9 +65,8 @@ Each operation tracks its depth:
 
 Test Coverage:
 
-- Operation service (arithmetic, decimals, edge cases)
+- Operation service (arithmetic, edge cases)
 - Depth validation utilities
-- Decimal conversion utilities
 
 ## Environment Configuration
 

@@ -12,7 +12,7 @@ info:
     url: https://opensource.org/licenses/MIT
 externalDocs:
   description: GitHub Repository
-  url: https://github.com/mohammed-taysser/ellty-second-task
+  url: https://github.com/mohammed-taysser/ramify
 
 servers:
   - url: /api

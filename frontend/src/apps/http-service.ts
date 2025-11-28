@@ -42,7 +42,7 @@ class HTTPService {
         const canRefresh =
           error.response?.status === 401 &&
           refreshToken &&
-          error.config.url !== 'auth/refresh-token';
+          !error.config.url.includes('auth/refresh-token')
 
         if (canRefresh) {
           try {

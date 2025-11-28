@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 // Load environment-specific .env file based on NODE_ENV
 const envFile = process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
-config({ path: envFile });
+config({ path: envFile, debug: process.env.NODE_ENV === 'dev' });
 
 /* ----------------------------- Shared Schemas ----------------------------- */
 
@@ -72,7 +72,7 @@ if (!envValidation.success) {
   process.exit(1); // Exit with failure
 }
 
-if (envValidation.data.ALLOWED_ORIGINS.length === 0) {
+if (envValidation.data.ALLOWED_ORIGINS.length === 0 && envValidation.data.NODE_ENV !== 'test') {
   console.warn('\n⚠️  ALLOWED_ORIGINS is empty, CORS is disabled');
 }
 

@@ -15,9 +15,6 @@ import operationRoutes from '@/modules/operation/operation.route';
 import systemRoutes from '@/modules/system/system.route';
 import userRoutes from '@/modules/user/user.route';
 import { ForbiddenError, NotFoundError } from '@/utils/errors.utils';
-import { logServerInfo } from '@/utils/system-info-logs';
-
-const startTime = Date.now();
 
 const app = express();
 
@@ -77,9 +74,5 @@ app.use((req, _res, next) => {
 
 // Global Error Handler (last)
 app.use(errorHandlerMiddleware);
-
-app.listen(CONFIG.PORT, () => {
-  logServerInfo(startTime);
-});
 
 export default app;

@@ -14,7 +14,7 @@ Before you begin, ensure you have the following installed:
 ## Project Structure
 
 ```text
-ellty-second-task/
+ramify/
 ├── backend/          # Node.js + Express + Prisma API
 ├── frontend/         # React + Vite frontend
 └── docker-compose.yml # PostgreSQL database
@@ -453,6 +453,6 @@ DATABASE_URL="postgresql://user:pass@localhost:5432/db?connection_limit=10&pool_
 
 If you encounter any issues not covered in this guide, please:
 
-1. Check the [GitHub Issues](https://github.com/mohammed-taysser/ellty-second-task/issues)
+1. Check the [GitHub Issues](https://github.com/mohammed-taysser/ramify/issues)
 2. Review the application logs
 3. Ensure all prerequisites are correctly installed
