@@ -34,6 +34,11 @@ userRoutes.patch(
   validateRequest(validator.updateUserSchema),
   controller.updateUser
 );
-userRoutes.delete('/:userId', authenticateMiddleware, controller.deleteUser);
+userRoutes.delete(
+  '/:userId',
+  authenticateMiddleware,
+  validateRequest(validator.getUserByIdSchema),
+  controller.deleteUser
+);
 
 export default userRoutes;

@@ -25,6 +25,7 @@ const createUserSchema = {
 };
 
 const updateUserSchema = {
+  params: getUserByIdSchema.params,
   body: z.object({
     name: z.string().trim().min(5).max(100).optional(),
     email: z.email().max(100).optional(),

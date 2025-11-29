@@ -48,6 +48,11 @@ discussionRoutes.post(
   controller.endDiscussion
 );
 
-discussionRoutes.delete('/:discussionId', authenticateMiddleware, controller.deleteDiscussion);
+discussionRoutes.delete(
+  '/:discussionId',
+  authenticateMiddleware,
+  validateRequest(validator.getDiscussionByIdSchema),
+  controller.deleteDiscussion
+);
 
 export default discussionRoutes;
