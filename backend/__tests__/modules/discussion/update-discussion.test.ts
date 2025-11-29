@@ -1,5 +1,10 @@
 import ENDPOINTS from '@test/constants/endpoint.constant';
-import { expectError, expectSuccess, request } from '@test/helpers/supertest-utils';
+import {
+  authenticatedRequest,
+  expectError,
+  expectSuccess,
+  request,
+} from '@test/helpers/supertest-utils';
 import { createTestDiscussion, createTestUser, generateAuthToken } from '@test/helpers/test-utils';
 
 describe('PATCH /api/discussion/:discussionId', () => {
@@ -9,10 +14,13 @@ describe('PATCH /api/discussion/:discussionId', () => {
     const discussion = await createTestDiscussion({ createdBy: user.id });
 
     const updatedTitle = 'Updated Title';
-    const response = await request()
-      .patch(`${ENDPOINTS.discussion}/${discussion.id}`)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({ title: updatedTitle });
+    const response = await authenticatedRequest(
+      'patch',
+      `${ENDPOINTS.discussion}/${discussion.id}`,
+      authToken
+    ).send({
+      title: updatedTitle,
+    });
 
     const body = expectSuccess(response);
     expect(body.data.title).toBe(updatedTitle);
@@ -22,10 +30,11 @@ describe('PATCH /api/discussion/:discussionId', () => {
     const user = await createTestUser();
     const authToken = generateAuthToken(user.id, user.email).accessToken;
 
-    const response = await request()
-      .patch(`${ENDPOINTS.discussion}/999999`)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({ title: 'Updated Title' });
+    const response = await authenticatedRequest(
+      'patch',
+      `${ENDPOINTS.discussion}/999999`,
+      authToken
+    );
 
     expectError(response, 404, 'Discussion not found');
   });

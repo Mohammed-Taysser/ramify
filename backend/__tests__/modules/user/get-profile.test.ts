@@ -1,5 +1,10 @@
 import ENDPOINTS from '@test/constants/endpoint.constant';
-import { expectError, expectSuccess, request } from '@test/helpers/supertest-utils';
+import {
+  authenticatedRequest,
+  expectError,
+  expectSuccess,
+  request,
+} from '@test/helpers/supertest-utils';
 import { createTestUser, generateAuthToken } from '@test/helpers/test-utils';
 
 describe('GET /api/user/me', () => {
@@ -7,9 +12,7 @@ describe('GET /api/user/me', () => {
     const user = await createTestUser();
     const authToken = generateAuthToken(user.id, user.email).accessToken;
 
-    const response = await request()
-      .get(`${ENDPOINTS.user}/me`)
-      .set('Authorization', `Bearer ${authToken}`);
+    const response = await authenticatedRequest('get', `${ENDPOINTS.user}/me`, authToken);
 
     const body = expectSuccess(response);
     expect(body.data.id).toBe(user.id);

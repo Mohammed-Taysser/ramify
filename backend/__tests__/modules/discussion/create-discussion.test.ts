@@ -1,5 +1,6 @@
 import ENDPOINTS from '@test/constants/endpoint.constant';
 import {
+  authenticatedRequest,
   expectError,
   expectSuccess,
   expectValidationError,
@@ -17,10 +18,9 @@ describe('POST /api/discussion', () => {
       startingValue: 50,
     };
 
-    const response = await request()
-      .post(ENDPOINTS.discussion)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send(discussionData);
+    const response = await authenticatedRequest('post', ENDPOINTS.discussion, authToken).send(
+      discussionData
+    );
 
     const body = expectSuccess(response, 201);
     expect(body.data).toHaveProperty('id');
@@ -33,10 +33,7 @@ describe('POST /api/discussion', () => {
     const user = await createTestUser();
     const authToken = generateAuthToken(user.id, user.email).accessToken;
 
-    const response = await request()
-      .post(ENDPOINTS.discussion)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({});
+    const response = await authenticatedRequest('post', ENDPOINTS.discussion, authToken);
 
     expectValidationError(response);
   });

@@ -62,10 +62,12 @@ describe('POST /api/auth/login', () => {
     it('should reject incorrect password', async () => {
       const user = await createTestUser({ password: CONFIG.SEED_USER_PASSWORD });
 
-      const response = await request().post(ENDPOINTS.auth.login).send({
-        email: user.email,
-        password: 'WrongPassword123!',
-      });
+      const response = await request()
+        .post(ENDPOINTS.auth.login)
+        .send({
+          email: user.email,
+          password: `${CONFIG.SEED_USER_PASSWORD}123`,
+        });
 
       expectError(response, 400, 'Invalid credentials');
     });

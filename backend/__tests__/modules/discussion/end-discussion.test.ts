@@ -1,5 +1,5 @@
 import ENDPOINTS from '@test/constants/endpoint.constant';
-import { expectError, expectSuccess, request } from '@test/helpers/supertest-utils';
+import { authenticatedRequest, expectError, expectSuccess } from '@test/helpers/supertest-utils';
 import { createTestDiscussion, createTestUser, generateAuthToken } from '@test/helpers/test-utils';
 
 describe('POST /api/discussion/:discussionId/end', () => {
@@ -8,9 +8,11 @@ describe('POST /api/discussion/:discussionId/end', () => {
     const authToken = generateAuthToken(user.id, user.email).accessToken;
     const discussion = await createTestDiscussion({ createdBy: user.id, isEnded: false });
 
-    const response = await request()
-      .post(`${ENDPOINTS.discussion}/${discussion.id}/end`)
-      .set('Authorization', `Bearer ${authToken}`);
+    const response = await authenticatedRequest(
+      'post',
+      `${ENDPOINTS.discussion}/${discussion.id}/end`,
+      authToken
+    );
 
     const body = expectSuccess(response);
     expect(body.data.isEnded).toBe(true);
@@ -22,9 +24,11 @@ describe('POST /api/discussion/:discussionId/end', () => {
     const authToken = generateAuthToken(user.id, user.email).accessToken;
     const discussion = await createTestDiscussion({ createdBy: user.id, isEnded: true });
 
-    const response = await request()
-      .post(`${ENDPOINTS.discussion}/${discussion.id}/end`)
-      .set('Authorization', `Bearer ${authToken}`);
+    const response = await authenticatedRequest(
+      'post',
+      `${ENDPOINTS.discussion}/${discussion.id}/end`,
+      authToken
+    );
 
     expectError(response, 400, 'Discussion is already ended');
   });
@@ -33,9 +37,11 @@ describe('POST /api/discussion/:discussionId/end', () => {
     const user = await createTestUser();
     const authToken = generateAuthToken(user.id, user.email).accessToken;
 
-    const response = await request()
-      .post(`${ENDPOINTS.discussion}/999999/end`)
-      .set('Authorization', `Bearer ${authToken}`);
+    const response = await authenticatedRequest(
+      'post',
+      `${ENDPOINTS.discussion}/999999/end`,
+      authToken
+    );
 
     expectError(response, 404, 'Discussion not found');
   });

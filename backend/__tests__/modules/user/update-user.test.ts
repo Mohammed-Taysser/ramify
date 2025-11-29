@@ -1,5 +1,10 @@
 import ENDPOINTS from '@test/constants/endpoint.constant';
-import { expectError, expectSuccess, request } from '@test/helpers/supertest-utils';
+import {
+  authenticatedRequest,
+  expectError,
+  expectSuccess,
+  request,
+} from '@test/helpers/supertest-utils';
 import { createTestUser, generateAuthToken } from '@test/helpers/test-utils';
 
 describe('PATCH /api/users/:userId', () => {
@@ -9,10 +14,13 @@ describe('PATCH /api/users/:userId', () => {
     const user = await createTestUser();
 
     const updatedName = 'Updated Name';
-    const response = await request()
-      .patch(`${ENDPOINTS.user}/${user.id}`)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({ name: updatedName });
+    const response = await authenticatedRequest(
+      'patch',
+      `${ENDPOINTS.user}/${user.id}`,
+      authToken
+    ).send({
+      name: updatedName,
+    });
 
     const body = expectSuccess(response);
     expect(body.data.id).toBe(user.id);
@@ -23,10 +31,13 @@ describe('PATCH /api/users/:userId', () => {
     const admin = await createTestUser();
     const authToken = generateAuthToken(admin.id, admin.email).accessToken;
 
-    const response = await request()
-      .patch(`${ENDPOINTS.user}/999999`)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({ name: 'Updated Name' });
+    const response = await authenticatedRequest(
+      'patch',
+      `${ENDPOINTS.user}/999999`,
+      authToken
+    ).send({
+      name: 'Updated Name',
+    });
 
     expectError(response, 404, 'User not found');
   });

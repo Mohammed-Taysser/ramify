@@ -13,6 +13,7 @@ import prisma from '@/apps/prisma';
 import { AuthenticatedRequest } from '@/types/import';
 import { calculateOperationDepth, validateTreeDepth } from '@/utils/depth.utils';
 import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
+import { userSelectBasic } from '@/utils/prisma-selects.utils';
 import { sendPaginatedResponse, sendSuccessResponse } from '@/utils/response.utils';
 
 async function getOperations(request: Request, response: Response) {
@@ -43,11 +44,7 @@ async function getOperations(request: Request, response: Response) {
       where: filters,
       include: {
         user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: userSelectBasic,
         },
       },
     }),
@@ -112,11 +109,7 @@ async function getOperationById(request: Request, response: Response) {
     where: { id: params.operationId },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
     },
   });
@@ -232,11 +225,7 @@ async function createOperation(request: Request, response: Response) {
     },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
     },
   });
@@ -315,11 +304,7 @@ const updateOperation = async (request: Request, response: Response): Promise<vo
       },
       include: {
         user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: userSelectBasic,
         },
       },
     });

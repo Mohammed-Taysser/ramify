@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 // Load environment-specific .env file based on NODE_ENV
 const envFile = process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
-config({ path: envFile, debug: process.env.NODE_ENV === 'development' });
+config({ path: envFile, debug: false });
 
 /* ----------------------------- Shared Schemas ----------------------------- */
 

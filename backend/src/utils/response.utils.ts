@@ -26,7 +26,7 @@ function sendSuccessResponse<T>(params: SuccessResponseParams<T>) {
   return response.status(statusCode).json({
     success: true,
     message,
-     data: data,
+    data: data,
   });
 }
 
@@ -37,7 +37,7 @@ function sendPaginatedResponse<T>(params: PaginatedResponseParams<T>) {
     success: true,
     message,
     data: {
-       data: data,
+      data: data,
       metadata,
     },
   });

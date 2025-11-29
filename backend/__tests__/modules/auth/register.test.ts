@@ -1,5 +1,3 @@
-import CONFIG from '@/apps/config';
-
 import ENDPOINTS from '@test/constants/endpoint.constant';
 import {
   expectError,
@@ -8,6 +6,8 @@ import {
   request,
 } from '@test/helpers/supertest-utils';
 import { createTestUser } from '@test/helpers/test-utils';
+
+import CONFIG from '@/apps/config';
 
 describe('POST /api/auth/register', () => {
   describe('successful registration', () => {
@@ -54,7 +54,7 @@ describe('POST /api/auth/register', () => {
         .send({
           name: 'Test User',
           email: `test-${Date.now()}@example.com`,
-          password: '123',
+          password: 123,
         });
 
       expectValidationError(response);

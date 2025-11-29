@@ -1,5 +1,6 @@
 import ENDPOINTS from '@test/constants/endpoint.constant';
 import {
+  authenticatedRequest,
   expectError,
   expectSuccess,
   expectValidationError,
@@ -20,10 +21,7 @@ describe('POST /api/users', () => {
       password: CONFIG.SEED_USER_PASSWORD,
     };
 
-    const response = await request()
-      .post(ENDPOINTS.user)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send(userData);
+    const response = await authenticatedRequest('post', ENDPOINTS.user, authToken).send(userData);
 
     const body = expectSuccess(response, 201);
     expect(body.data).toHaveProperty('id');
@@ -36,10 +34,7 @@ describe('POST /api/users', () => {
     const admin = await createTestUser();
     const authToken = generateAuthToken(admin.id, admin.email).accessToken;
 
-    const response = await request()
-      .post(ENDPOINTS.user)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({});
+    const response = await authenticatedRequest('post', ENDPOINTS.user, authToken);
 
     expectValidationError(response);
   });
@@ -49,14 +44,11 @@ describe('POST /api/users', () => {
     const authToken = generateAuthToken(admin.id, admin.email).accessToken;
     const existingUser = await createTestUser();
 
-    const response = await request()
-      .post(ENDPOINTS.user)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({
-        name: 'Duplicate User',
-        email: existingUser.email,
-        password: CONFIG.SEED_USER_PASSWORD,
-      });
+    const response = await authenticatedRequest('post', ENDPOINTS.user, authToken).send({
+      name: 'Duplicate User',
+      email: existingUser.email,
+      password: CONFIG.SEED_USER_PASSWORD,
+    });
 
     expectError(response, 409, 'Email already registered');
   });

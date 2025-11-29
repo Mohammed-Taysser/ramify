@@ -11,6 +11,7 @@ import {
 import prisma from '@/apps/prisma';
 import { AuthenticatedRequest } from '@/types/import';
 import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
+import { userSelectBasic } from '@/utils/prisma-selects.utils';
 import { sendPaginatedResponse, sendSuccessResponse } from '@/utils/response.utils';
 
 async function getDiscussions(request: Request, response: Response) {
@@ -49,21 +50,13 @@ async function getDiscussions(request: Request, response: Response) {
       where: filters,
       include: {
         user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: userSelectBasic,
         },
         operations: {
           orderBy: { id: 'asc' },
           include: {
             user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
+              select: userSelectBasic,
             },
           },
         },
@@ -138,21 +131,13 @@ async function getDiscussionById(request: Request, response: Response) {
     where: { id: params.discussionId },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },
@@ -188,21 +173,13 @@ async function createDiscussion(request: Request, response: Response) {
     },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },
@@ -242,21 +219,13 @@ async function updateDiscussion(request: Request, response: Response) {
     },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },
@@ -292,21 +261,13 @@ async function deleteDiscussion(request: Request, response: Response) {
     where: { id: discussionId },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },
@@ -350,21 +311,13 @@ async function endDiscussion(request: Request, response: Response) {
     },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },

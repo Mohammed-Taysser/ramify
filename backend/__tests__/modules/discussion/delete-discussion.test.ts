@@ -1,5 +1,10 @@
 import ENDPOINTS from '@test/constants/endpoint.constant';
-import { expectError, expectSuccess, request } from '@test/helpers/supertest-utils';
+import {
+  authenticatedRequest,
+  expectError,
+  expectSuccess,
+  request,
+} from '@test/helpers/supertest-utils';
 import { createTestDiscussion, createTestUser, generateAuthToken } from '@test/helpers/test-utils';
 
 describe('DELETE /api/discussion/:discussionId', () => {
@@ -8,9 +13,11 @@ describe('DELETE /api/discussion/:discussionId', () => {
     const authToken = generateAuthToken(user.id, user.email).accessToken;
     const discussion = await createTestDiscussion({ createdBy: user.id });
 
-    const response = await request()
-      .delete(`${ENDPOINTS.discussion}/${discussion.id}`)
-      .set('Authorization', `Bearer ${authToken}`);
+    const response = await authenticatedRequest(
+      'delete',
+      `${ENDPOINTS.discussion}/${discussion.id}`,
+      authToken
+    );
 
     const body = expectSuccess(response);
     expect(body.data.id).toBe(discussion.id);
@@ -21,9 +28,11 @@ describe('DELETE /api/discussion/:discussionId', () => {
     const user = await createTestUser();
     const authToken = generateAuthToken(user.id, user.email).accessToken;
 
-    const response = await request()
-      .delete(`${ENDPOINTS.discussion}/999999`)
-      .set('Authorization', `Bearer ${authToken}`);
+    const response = await authenticatedRequest(
+      'delete',
+      `${ENDPOINTS.discussion}/999999`,
+      authToken
+    );
 
     expectError(response, 404, 'Discussion not found');
   });

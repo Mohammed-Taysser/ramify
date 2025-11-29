@@ -37,10 +37,6 @@ async function authenticateMiddleware(req: Request, _res: Response, next: NextFu
     // Fetch only required user details (minimal)
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      include: {
-        discussions: true,
-        operations: true,
-      },
     });
 
     if (!user) {

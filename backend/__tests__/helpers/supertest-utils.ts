@@ -2,6 +2,10 @@ import supertest from 'supertest';
 
 import app from '@/app';
 
+function request() {
+  return supertest(app);
+}
+
 /**
  * Make an authenticated request with supertest
  */
@@ -10,7 +14,7 @@ function authenticatedRequest(
   url: string,
   token: string
 ) {
-  return supertest(app)
+  return request()
     [method](url)
     .set('Authorization', `Bearer ${token}`)
     .set('Accept', 'application/json');
@@ -88,10 +92,6 @@ async function rapidRequests(
   }
 
   return Promise.all(promises);
-}
-
-function request() {
-  return supertest(app);
 }
 
 export {

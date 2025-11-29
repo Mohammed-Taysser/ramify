@@ -1,3 +1,5 @@
+import { randomInt } from 'node:crypto';
+
 import { Discussion, Operation, OPERATION_TYPE, User } from '@prisma';
 
 import CONFIG from '@/apps/config';
@@ -15,7 +17,7 @@ async function createTestUser(overrides: Partial<User> = {}) {
   return prisma.user.create({
     data: {
       name: overrides.name || `Test User ${Date.now()}`,
-      email: overrides.email || `test-${Date.now()}@example.com`,
+      email: overrides.email || `test-${Date.now()}-${randomInt(1000000)}@example.com`,
       password: hashedPassword,
     },
   });

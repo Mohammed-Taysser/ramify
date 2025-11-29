@@ -1,5 +1,10 @@
 import ENDPOINTS from '@test/constants/endpoint.constant';
-import { expectError, expectSuccess, request } from '@test/helpers/supertest-utils';
+import {
+  authenticatedRequest,
+  expectError,
+  expectSuccess,
+  request,
+} from '@test/helpers/supertest-utils';
 import { createTestUser, generateAuthToken } from '@test/helpers/test-utils';
 
 describe('DELETE /api/users/:userId', () => {
@@ -8,9 +13,11 @@ describe('DELETE /api/users/:userId', () => {
     const authToken = generateAuthToken(admin.id, admin.email).accessToken;
     const user = await createTestUser();
 
-    const response = await request()
-      .delete(`${ENDPOINTS.user}/${user.id}`)
-      .set('Authorization', `Bearer ${authToken}`);
+    const response = await authenticatedRequest(
+      'delete',
+      `${ENDPOINTS.user}/${user.id}`,
+      authToken
+    );
 
     const body = expectSuccess(response);
     expect(body.data.id).toBe(user.id);
@@ -21,9 +28,7 @@ describe('DELETE /api/users/:userId', () => {
     const admin = await createTestUser();
     const authToken = generateAuthToken(admin.id, admin.email).accessToken;
 
-    const response = await request()
-      .delete(`${ENDPOINTS.user}/999999`)
-      .set('Authorization', `Bearer ${authToken}`);
+    const response = await authenticatedRequest('delete', `${ENDPOINTS.user}/999999`, authToken);
 
     expectError(response, 404, 'User not found');
   });
