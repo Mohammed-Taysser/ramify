@@ -1,4 +1,4 @@
-import request from 'supertest';
+import supertest from 'supertest';
 
 import app from '@/app';
 
@@ -10,7 +10,7 @@ function authenticatedRequest(
   url: string,
   token: string
 ) {
-  return request(app)
+  return supertest(app)
     [method](url)
     .set('Authorization', `Bearer ${token}`)
     .set('Accept', 'application/json');
@@ -19,7 +19,7 @@ function authenticatedRequest(
 /**
  * Expect a successful response
  */
-function expectSuccess(response: request.Response, statusCode = 200) {
+function expectSuccess(response: supertest.Response, statusCode = 200) {
   expect(response.status).toBe(statusCode);
   expect(response.body).toHaveProperty('success', true);
   return response.body;
@@ -28,7 +28,7 @@ function expectSuccess(response: request.Response, statusCode = 200) {
 /**
  * Expect an error response
  */
-function expectError(response: request.Response, statusCode: number, messageContains?: string) {
+function expectError(response: supertest.Response, statusCode: number, messageContains?: string) {
   expect(response.status).toBe(statusCode);
   expect(response.body).toHaveProperty('success', false);
 
@@ -42,7 +42,7 @@ function expectError(response: request.Response, statusCode: number, messageCont
 /**
  * Expect validation error
  */
-function expectValidationError(response: request.Response, field?: string) {
+function expectValidationError(response: supertest.Response, field?: string) {
   expectError(response, 400);
 
   if (field) {
@@ -55,7 +55,7 @@ function expectValidationError(response: request.Response, field?: string) {
 /**
  * Expect rate limit error
  */
-function expectRateLimitError(response: request.Response) {
+function expectRateLimitError(response: supertest.Response) {
   expectError(response, 429, 'Too many requests');
 
   // Check for rate limit headers
@@ -78,7 +78,7 @@ async function rapidRequests(
   const promises = [];
 
   for (let i = 0; i < count; i++) {
-    const req = token ? authenticatedRequest(method, url, token) : request(app)[method](url);
+    const req = token ? authenticatedRequest(method, url, token) : supertest(app)[method](url);
 
     if (body && (method === 'post' || method === 'patch')) {
       req.send(body);
@@ -90,6 +90,10 @@ async function rapidRequests(
   return Promise.all(promises);
 }
 
+function request() {
+  return supertest(app);
+}
+
 export {
   authenticatedRequest,
   expectError,
@@ -97,4 +101,5 @@ export {
   expectSuccess,
   expectValidationError,
   rapidRequests,
+  request,
 };

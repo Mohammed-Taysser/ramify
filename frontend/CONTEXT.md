@@ -120,6 +120,23 @@ src/
    - Lazy load routes and heavy components
    - Optimize images and assets
 
+## Feature Development Workflow
+
+### 1. Test-Driven / Test-Alongside Development
+
+- **Mandatory**: Create tests for new features _before_ or _alongside_ implementation.
+- **Coverage**: Ensure new components/hooks have corresponding tests immediately.
+
+### 2. Code-Test Lifecycle Alignment
+
+- **Drop Tests with Code**: If a component or feature is removed, remove its corresponding tests immediately.
+- **Alignment**: Keep tests and code in sync at all times. Do not leave orphaned tests.
+
+### 3. Documentation & API Alignment
+
+- **API Sync**: Ensure frontend API clients/types match the backend Swagger/OpenAPI definition.
+- **Docs Alignment**: Keep all documentation (README, Storybook, code comments) aligned with code changes.
+
 ## Output Format Expectations
 
 ### Artifacts

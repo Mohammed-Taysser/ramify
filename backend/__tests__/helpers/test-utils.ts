@@ -9,7 +9,8 @@ import tokenService from '@/services/token.service';
  * Create a test user with default values
  */
 async function createTestUser(overrides: Partial<User> = {}) {
-  const hashedPassword = await tokenService.hash(CONFIG.SEED_USER_PASSWORD);
+  const rawPassword = overrides.password || CONFIG.SEED_USER_PASSWORD;
+  const hashedPassword = await tokenService.hash(rawPassword);
 
   return prisma.user.create({
     data: {
@@ -118,4 +119,4 @@ async function getOperationAfterValue(operationId: number): Promise<number> {
   return operation?.afterValue ?? 0;
 }
 
-export { generateAuthToken, createTestDiscussion, createTestOperation, createTestUser };
+export { createTestDiscussion, createTestOperation, createTestUser, generateAuthToken };

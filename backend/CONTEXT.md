@@ -118,6 +118,24 @@ it('should test something', async () => {
    - Use `toBeGreaterThanOrEqual` for flexible assertions
    - Find specific items rather than iterating all results
 
+## Feature Development Workflow
+
+### 1. Test-Driven / Test-Alongside Development
+
+- **Mandatory**: Create tests for new features _before_ or _alongside_ implementation.
+- **Coverage**: Ensure new code has corresponding tests immediately.
+
+### 2. Code-Test Lifecycle Alignment
+
+- **Drop Tests with Code**: If a feature or code path is removed, remove its corresponding tests immediately.
+- **Alignment**: Keep tests and code in sync at all times. Do not leave orphaned tests.
+
+### 3. Documentation & Swagger (CRITICAL)
+
+- **Swagger Mandate**: Swagger/OpenAPI documentation **MUST** be updated **BEFORE** and **AFTER** any API change.
+- **Sync**: Ensure `docs/swagger.yaml` (or equivalent) perfectly matches the implementation.
+- **Docs Alignment**: Keep all documentation (README, API docs, code comments) aligned with code changes.
+
 ## Output Format Expectations
 
 ### Artifacts

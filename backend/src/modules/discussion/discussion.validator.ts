@@ -23,6 +23,7 @@ const createDiscussionSchema = {
 };
 
 const updateDiscussionSchema = {
+  params: getDiscussionByIdSchema.params,
   body: z.object({
     title: z.string().trim().min(5).max(100).optional(),
   }),
