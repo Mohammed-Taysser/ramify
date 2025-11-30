@@ -331,14 +331,12 @@ paths:
                       data:
                         $ref: '#/components/schemas/User'
 
-  /users/list:
+  /users/all:
     get:
-      summary: Get a list of users
+      summary: Get all users (non-paginated)
       tags:
         - Users
       parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/LimitParameter'
         - in: query
           name: name
           schema: { type: string, minLength: 3, maxLength: 100 }
@@ -524,14 +522,12 @@ paths:
                       data:
                         $ref: '#/components/schemas/Discussion'
 
-  /discussion/list:
+  /discussion/all:
     get:
-      summary: Get a list of discussions
+      summary: Get all discussions (non-paginated)
       tags:
         - Discussions
       parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/LimitParameter'
         - in: query
           name: title
           schema: { type: string, minLength: 3, maxLength: 100 }
@@ -764,14 +760,12 @@ paths:
                       data:
                         $ref: '#/components/schemas/Operation'
 
-  /operation/list:
+  /operation/all:
     get:
-      summary: Get a list of operations
+      summary: Get all operations (non-paginated)
       tags:
         - Operations
       parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/LimitParameter'
         - in: query
           name: operationType
           schema: { type: string, minLength: 3, maxLength: 100 }

@@ -23,7 +23,7 @@ const createOperationSchema = {
       value: z.coerce.number(),
       parentId: z.coerce.number().positive().int().nullable().optional(),
       discussionId: z.coerce.number().positive().int().optional(),
-      title: z.string().min(1).max(200).optional(),
+      title: z.string().trim().min(1).max(200).optional(),
     })
     .refine((data) => data.parentId !== null || data.discussionId !== undefined, {
       message: 'Either parentId or discussionId must be provided',
@@ -38,7 +38,7 @@ const updateOperationSchema = {
     .object({
       value: z.coerce.number().optional(),
       operationType: z.enum(OPERATION_TYPE).optional(),
-      title: z.string().min(1).max(200).optional(),
+      title: z.string().trim().min(1).max(200).optional(),
     })
     .refine(
       (data) => {

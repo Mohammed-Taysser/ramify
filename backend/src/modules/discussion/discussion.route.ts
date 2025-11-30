@@ -10,10 +10,11 @@ import validateRequest from '@/middleware/validate-request.middleware';
 const discussionRoutes = Router();
 
 discussionRoutes.get(
-  '/list',
+  '/all',
   validateRequest(validator.getDiscussionsListSchema),
   controller.getDiscussionsList
 );
+
 discussionRoutes.get(
   '/',
   validateRequest(validator.getDiscussionsListSchema),

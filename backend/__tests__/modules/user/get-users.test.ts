@@ -2,12 +2,12 @@ import ENDPOINTS from '@test/constants/endpoint.constant';
 import { expectSuccess, request } from '@test/helpers/supertest-utils';
 import { createTestUser } from '@test/helpers/test-utils';
 
-describe('GET /api/users', () => {
-  it('should return paginated list of users', async () => {
+describe('GET /api/users/all', () => {
+  it('should return list of users', async () => {
     await createTestUser({ name: 'User 1' });
     await createTestUser({ name: 'User 2' });
 
-    const response = await request().get(`${ENDPOINTS.user}/list`).query({ page: 1, limit: 10 });
+    const response = await request().get(`${ENDPOINTS.user}/all`);
 
     const body = expectSuccess(response);
     expect(Array.isArray(body.data)).toBe(true);
@@ -18,7 +18,7 @@ describe('GET /api/users', () => {
     const uniqueName = `TestUser${Date.now()}`;
     await createTestUser({ name: uniqueName });
 
-    const response = await request().get(`${ENDPOINTS.user}/list`).query({ name: uniqueName });
+    const response = await request().get(`${ENDPOINTS.user}/all`).query({ name: uniqueName });
 
     const body = expectSuccess(response);
     expect(Array.isArray(body.data)).toBe(true);
@@ -31,7 +31,7 @@ describe('GET /api/users', () => {
     const uniqueEmail = `test${Date.now()}@example.com`;
     await createTestUser({ email: uniqueEmail });
 
-    const response = await request().get(`${ENDPOINTS.user}/list`).query({ email: uniqueEmail });
+    const response = await request().get(`${ENDPOINTS.user}/all`).query({ email: uniqueEmail });
 
     const body = expectSuccess(response);
     expect(Array.isArray(body.data)).toBe(true);

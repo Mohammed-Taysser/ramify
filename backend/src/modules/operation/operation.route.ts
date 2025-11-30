@@ -10,11 +10,12 @@ import validateRequest from '@/middleware/validate-request.middleware';
 const operationRoutes = Router();
 
 operationRoutes.get(
-  '/list',
+  '/all',
   authenticateMiddleware,
   validateRequest(validator.getOperationsListSchema),
   controller.getOperationsList
 );
+
 operationRoutes.get(
   '/',
   authenticateMiddleware,

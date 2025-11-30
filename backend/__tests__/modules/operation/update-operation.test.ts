@@ -160,6 +160,29 @@ describe('PATCH /api/operation/:id', () => {
       expect(response.status).toBe(400);
     });
 
+    it('should reject division by zero during update', async () => {
+      const user = await createTestUser();
+      const authToken = generateAuthToken(user.id, user.email).accessToken;
+      const discussion = await createTestDiscussion({ createdBy: user.id });
+      const operation = await createTestOperation({
+        discussionId: discussion.id,
+        operationType: OPERATION_TYPE.DIVIDE,
+        value: 5,
+        createdBy: user.id,
+      });
+
+      const response = await authenticatedRequest(
+        'patch',
+        `${ENDPOINTS.operation}/${operation.id}`,
+        authToken
+      ).send({
+        value: 0, // Division by zero
+      });
+
+      expectError(response, 400, 'Cannot divide by zero');
+      expect(response.status).toBe(400);
+    });
+
     it('should reject invalid operation type', async () => {
       const user = await createTestUser();
       const authToken = generateAuthToken(user.id, user.email).accessToken;

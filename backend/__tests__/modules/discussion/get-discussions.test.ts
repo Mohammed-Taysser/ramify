@@ -2,13 +2,13 @@ import ENDPOINTS from '@test/constants/endpoint.constant';
 import { expectError, expectSuccess, request } from '@test/helpers/supertest-utils';
 import { createTestDiscussion, createTestUser } from '@test/helpers/test-utils';
 
-describe('GET /api/discussion/list', () => {
+describe('GET /api/discussion/all', () => {
   it('should return list of discussions', async () => {
     const user = await createTestUser();
     await createTestDiscussion({ createdBy: user.id, title: 'Discussion 1' });
     await createTestDiscussion({ createdBy: user.id, title: 'Discussion 2' });
 
-    const response = await request().get(`${ENDPOINTS.discussion}/list`);
+    const response = await request().get(`${ENDPOINTS.discussion}/all`);
 
     const body = expectSuccess(response);
     expect(Array.isArray(body.data)).toBe(true);
@@ -23,12 +23,65 @@ describe('GET /api/discussion/list', () => {
     await createTestDiscussion({ createdBy: user.id, title: uniqueTitle });
 
     const response = await request()
-      .get(`${ENDPOINTS.discussion}/list`)
+      .get(`${ENDPOINTS.discussion}/all`)
       .query({ title: uniqueTitle });
 
     const body = expectSuccess(response);
     expect(body.data.length).toBeGreaterThanOrEqual(1);
     expect(body.data[0].title).toBe(uniqueTitle);
+  });
+
+  it('should filter by userId', async () => {
+    const user = await createTestUser();
+    await createTestDiscussion({ createdBy: user.id, title: 'User Discussion' });
+
+    const response = await request().get(`${ENDPOINTS.discussion}/all`).query({ userId: user.id });
+
+    const body = expectSuccess(response);
+    expect(body.data.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('GET /api/discussion (paginated)', () => {
+  it('should return paginated discussions with metadata', async () => {
+    const user = await createTestUser();
+    await createTestDiscussion({ createdBy: user.id });
+    await createTestDiscussion({ createdBy: user.id });
+
+    const response = await request().get(ENDPOINTS.discussion).query({ page: 1, limit: 10 });
+
+    const body = expectSuccess(response);
+    expect(body.data).toHaveProperty('data');
+    expect(body.data).toHaveProperty('metadata');
+    expect(body.data.metadata).toHaveProperty('total');
+    expect(body.data.metadata).toHaveProperty('page', 1);
+    expect(body.data.metadata).toHaveProperty('limit', 10);
+    expect(body.data.metadata).toHaveProperty('totalPages');
+  });
+
+  it('should filter paginated discussions by title', async () => {
+    const user = await createTestUser();
+    const title = `Paginated ${Date.now()}`;
+    await createTestDiscussion({ createdBy: user.id, title });
+
+    const response = await request().get(ENDPOINTS.discussion).query({ title, page: 1, limit: 10 });
+
+    const body = expectSuccess(response);
+    expect(body.data).toHaveProperty('data');
+    expect(body.data).toHaveProperty('metadata');
+  });
+
+  it('should filter paginated discussions by userId', async () => {
+    const user = await createTestUser();
+    await createTestDiscussion({ createdBy: user.id });
+
+    const response = await request()
+      .get(ENDPOINTS.discussion)
+      .query({ userId: user.id, page: 1, limit: 10 });
+
+    const body = expectSuccess(response);
+    expect(body.data).toHaveProperty('data');
+    expect(body.data).toHaveProperty('metadata');
   });
 });
 
