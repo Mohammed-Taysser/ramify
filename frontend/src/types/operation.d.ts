@@ -1,4 +1,4 @@
-type OperationType = OPERATION_TYPE.ADD | 'SUBTRACT' | 'MULTIPLY' | 'DIVIDE';
+type OperationType = 'ADD' | 'SUBTRACT' | 'MULTIPLY' | 'DIVIDE';
 
 interface Operation extends BaseEntity {
   discussionId: number;

@@ -1,6 +1,6 @@
 export const getOperationSymbol = (type: OperationType) => {
   switch (type) {
-    case OPERATION_TYPE.ADD:
+    case 'ADD':
       return '+';
     case 'SUBTRACT':
       return '−';
@@ -13,7 +13,7 @@ export const getOperationSymbol = (type: OperationType) => {
 
 export const getOperationColor = (type: OperationType) => {
   switch (type) {
-    case OPERATION_TYPE.ADD:
+    case 'ADD':
       return '#52c41a';
     case 'SUBTRACT':
       return '#f5222d';

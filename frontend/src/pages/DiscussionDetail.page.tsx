@@ -3,9 +3,10 @@ import operationApi from '@/api/operation.api';
 import { SITEMAP } from '@/apps/config';
 import DiscussionTree from '@/components/DiscussionTree';
 import OperationForm from '@/components/OperationForm';
+import TreeVisualization from '@/components/TreeVisualization';
 import useApiMessage from '@/hooks/useApiMessage';
 import { buildOperationTree, type TreeOperation } from '@/utils/tree.utils';
-import { Button, Card, Col, Empty, Modal, Row, Skeleton, Space, Tag, Typography } from 'antd';
+import { Button, Card, Col, Empty, Modal, Row, Segmented, Skeleton, Space, Tag, Typography } from 'antd';
 import { ArrowLeft, Calculator, MessageSquare, Plus } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -24,6 +25,7 @@ const DiscussionDetail = () => {
   const [fetchedDiscussion, setFetchedDiscussion] = useState<Maybe<Discussion>>();
 
   const [editingOperation, setEditingOperation] = useState<TreeOperation | null>(null);
+  const [viewMode, setViewMode] = useState<'timeline' | 'tree'>('timeline');
 
   useEffect(() => {
     if (discussionId && !Number.isNaN(Number(discussionId))) {
@@ -280,12 +282,33 @@ const DiscussionDetail = () => {
                     </Empty>
                   </div>
                 ) : (
-                  <DiscussionTree
-                    operations={operationTree}
-                    onAddChild={handleAddChildOperation}
-                    onEdit={handleEditOperation}
-                    isEnded={fetchedDiscussion?.isEnded}
-                  />
+                  <>
+                    <div className="flex justify-center mb-4">
+                      <Segmented
+                        options={[
+                          { label: 'Timeline View', value: 'timeline' },
+                          { label: 'Tree View', value: 'tree' },
+                        ]}
+                        value={viewMode}
+                        onChange={(value) => setViewMode(value as 'timeline' | 'tree')}
+                      />
+                    </div>
+                    {viewMode === 'timeline' ? (
+                      <DiscussionTree
+                        operations={operationTree}
+                        onAddChild={handleAddChildOperation}
+                        onEdit={handleEditOperation}
+                        isEnded={fetchedDiscussion?.isEnded}
+                      />
+                    ) : (
+                      <TreeVisualization
+                        operations={operationTree}
+                        onAddChild={handleAddChildOperation}
+                        onEdit={handleEditOperation}
+                        isEnded={fetchedDiscussion?.isEnded}
+                      />
+                    )}
+                  </>
                 )}
               </Card>
             </>
