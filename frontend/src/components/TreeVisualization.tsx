@@ -24,66 +24,119 @@ const nodeTypes = {
   operationNode: OperationNode,
 };
 
+// Helper to calculate subtree width
+const calculateSubtreeWidth = (
+  operation: TreeOperation,
+  horizontalSpacing: number
+): number => {
+  if (operation.children.length === 0) {
+    return horizontalSpacing;
+  }
+
+  const childrenWidth = operation.children.reduce((sum, child) => {
+    return sum + calculateSubtreeWidth(child, horizontalSpacing);
+  }, 0);
+
+  return Math.max(horizontalSpacing, childrenWidth);
+};
+
+// Recursive layout function
+const assignPositions = (
+  operation: TreeOperation,
+  x: number,
+  y: number,
+  horizontalSpacing: number,
+  verticalSpacing: number,
+  nodes: Node[],
+  edges: Edge[]
+) => {
+  // Add current node
+  nodes.push({
+    id: `operation-${operation.id}`,
+    type: 'operationNode',
+    position: { x, y },
+    data: operation,
+  });
+
+  // Add edge from parent
+  if (operation.parentId !== null) {
+    edges.push({
+      id: `edge-${operation.parentId}-${operation.id}`,
+      source: `operation-${operation.parentId}`,
+      target: `operation-${operation.id}`,
+      animated: true,
+      style: {
+        stroke: '#666',
+        strokeWidth: 2,
+      },
+      type: 'smoothstep',
+    });
+  }
+
+  if (operation.children.length > 0) {
+    // Calculate total width of children subtrees
+    const childrenWidths = operation.children.map((child) =>
+      calculateSubtreeWidth(child, horizontalSpacing)
+    );
+    const totalChildrenWidth = childrenWidths.reduce((a, b) => a + b, 0);
+
+    // Start positioning children centered below parent
+    let currentChildX = x - totalChildrenWidth / 2;
+
+    operation.children.forEach((child, index) => {
+      const childWidth = childrenWidths[index];
+      // Position child at center of its allocated space
+      const childX = currentChildX + childWidth / 2;
+
+      assignPositions(
+        child,
+        childX,
+        y + verticalSpacing,
+        horizontalSpacing,
+        verticalSpacing,
+        nodes,
+        edges
+      );
+
+      currentChildX += childWidth;
+    });
+  }
+};
+
 // Position nodes using a proper tree layout algorithm
 const layoutTree = (
   operations: TreeOperation[],
   horizontalSpacing = 400,
-  verticalSpacing = 200,
-  currentX = 0,
-  currentY = 0,
-  nodes: Node[] = [],
-  edges: Edge[] = []
+  verticalSpacing = 200
 ): { nodes: Node[]; edges: Edge[]; } => {
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
+
   if (operations.length === 0) {
     return { nodes, edges };
   }
 
-  // Calculate total width needed for all operations at this level
-  const totalWidth = operations.length * horizontalSpacing;
-  let xOffset = currentX - totalWidth / 2;
+  // Handle multiple root nodes (though usually there's one starting point)
+  const rootsWidths = operations.map((op) => calculateSubtreeWidth(op, horizontalSpacing));
+  const totalRootsWidth = rootsWidths.reduce((a, b) => a + b, 0);
 
-  operations.forEach((operation) => {
-    // Calculate x position for this node
-    const nodeX = xOffset + horizontalSpacing / 2;
-    const nodeY = currentY;
+  let currentRootX = -totalRootsWidth / 2;
 
-    // Create node
-    nodes.push({
-      id: `operation-${operation.id}`,
-      type: 'operationNode',
-      position: { x: nodeX, y: nodeY },
-      data: operation,
-    });
+  operations.forEach((root, index) => {
+    const rootWidth = rootsWidths[index];
+    const rootX = currentRootX + rootWidth / 2;
 
-    // Create edge from parent if it exists
-    if (operation.parentId !== null) {
-      edges.push({
-        id: `edge-${operation.parentId}-${operation.id}`,
-        source: `operation-${operation.parentId}`,
-        target: `operation-${operation.id}`,
-        animated: true,
-        style: {
-          stroke: '#666',
-          strokeWidth: 2,
-        },
-        type: 'smoothstep',
-      });
-    }
+    assignPositions(
+      root,
+      rootX,
+      0,
+      horizontalSpacing,
+      verticalSpacing,
+      nodes,
+      edges
+    );
 
-    // Recursively layout children
-    if (operation.children.length > 0) {
-      layoutTree(
-        operation.children,
-        horizontalSpacing,
-        verticalSpacing,
-        nodeX, // Center children under this node
-        currentY + verticalSpacing,
-        nodes,
-        edges
-      );
-    }
-
-    xOffset += horizontalSpacing;
+    currentRootX += rootWidth;
   });
 
   return { nodes, edges };

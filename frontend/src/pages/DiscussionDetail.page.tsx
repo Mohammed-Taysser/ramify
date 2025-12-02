@@ -103,7 +103,7 @@ const DiscussionDetail = () => {
         });
       } else {
         await operationApi.create({
-          operation: type,
+          operationType: type,
           value: operand,
           parentId: selectedParentId,
           discussionId: fetchedDiscussion.id,
