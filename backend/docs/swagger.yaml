@@ -873,6 +873,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+    delete:
+      summary: Delete an operation
+      description: Deletes an operation and all its descendants due to cascade deletion policy in the database.
+      tags:
+        - Operations
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: operationId
+          required: true
+          schema:
+            type: integer
+          description: ID of the operation to delete
+      responses:
+        '200':
+          description: Operation deleted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 'Operation deleted successfully'
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+        '400':
+          description: Cannot delete operation from ended discussion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Operation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     SuccessResponse:
