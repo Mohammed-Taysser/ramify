@@ -323,9 +323,45 @@ const updateOperation = async (request: Request, response: Response): Promise<vo
   });
 };
 
+async function deleteOperation(request: Request, response: Response) {
+  const authenticatedRequest = request as unknown as AuthenticatedRequest<
+    GetOperationByIdParams,
+    unknown,
+    unknown,
+    unknown
+  >;
+
+  const { params } = authenticatedRequest;
+  const operationId = Number(params.operationId);
+
+  const operation = await prisma.operation.findUnique({
+    where: { id: operationId },
+    include: { discussion: true },
+  });
+
+  if (!operation) {
+    throw new NotFoundError('Operation not found');
+  }
+
+  if (operation.discussion.isEnded) {
+    throw new BadRequestError('Cannot delete operation from ended discussion');
+  }
+
+  await prisma.operation.delete({
+    where: { id: operationId },
+  });
+
+  sendSuccessResponse({
+    response,
+    message: 'Operation deleted successfully',
+    data: null,
+  });
+}
+
 const operationController = {
   createOperation,
   updateOperation,
+  deleteOperation,
   getOperationById,
   getOperations,
   getOperationsList,

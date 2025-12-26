@@ -42,7 +42,7 @@ const OperationFormContent = ({
       case "MULTIPLY":
         return currentValue * operand;
       case "DIVIDE":
-        return operand === 0 ? 0 : currentValue / operand;
+        return operand === 0 ? Number.NaN : currentValue / operand;
       default:
         return currentValue;
     }
@@ -111,7 +111,9 @@ const OperationFormContent = ({
             <Typography.Text>{operations.find((op) => op.type === selectedType)?.symbol}</Typography.Text>
             <Typography.Text strong>{operand.toFixed(2)}</Typography.Text>
             <Typography.Text>=</Typography.Text>
-            <Typography.Text strong style={{ color: "#08b52e" }}>{calculatePreview().toFixed(2)}</Typography.Text>
+            <Typography.Text strong style={{ color: Number.isNaN(calculatePreview()) ? "red" : "#08b52e" }}>
+              {Number.isNaN(calculatePreview()) ? "Error (Div by 0)" : calculatePreview().toFixed(2)}
+            </Typography.Text>
           </Space>
         </div>
       </Card>

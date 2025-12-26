@@ -146,6 +146,15 @@ const DiscussionDetail = () => {
     return buildOperationTree(fetchedDiscussion.operations);
   }, [fetchedDiscussion]);
 
+  const getModalCurrentValue = () => {
+    if (editingOperation) return editingOperation.beforeValue;
+    if (selectedParentId === null || selectedParentId === undefined) {
+      return fetchedDiscussion?.startingValue || 0;
+    }
+    const parentOp = fetchedDiscussion?.operations.find((op) => op.id === selectedParentId);
+    return parentOp?.afterValue || 0;
+  };
+
   return (
     <div
       className="min-h-screen"
@@ -158,13 +167,7 @@ const DiscussionDetail = () => {
           setEditingOperation(null);
           setSelectedParentId(undefined);
         }}
-        currentValue={
-          editingOperation
-            ? editingOperation.beforeValue
-            : selectedParentId === null || selectedParentId === undefined
-              ? fetchedDiscussion?.startingValue || 0
-              : fetchedDiscussion?.operations.find((op) => op.id === selectedParentId)?.afterValue || 0
-        }
+        currentValue={getModalCurrentValue()}
         initialValues={
           editingOperation
             ? {
@@ -233,7 +236,7 @@ const DiscussionDetail = () => {
                       strong
                       className={`text-xl font-mono transition-colors duration-300`}
                     >
-                      Current: {currentValue.toFixed(2)}
+                      Latest Result: {currentValue.toFixed(2)}
                     </Text>
                   </Space>
                 </Col>

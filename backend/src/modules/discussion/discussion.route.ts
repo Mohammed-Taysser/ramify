@@ -11,18 +11,21 @@ const discussionRoutes = Router();
 
 discussionRoutes.get(
   '/all',
+  authenticateMiddleware,
   validateRequest(validator.getDiscussionsListSchema),
   controller.getDiscussionsList
 );
 
 discussionRoutes.get(
   '/',
+  authenticateMiddleware,
   validateRequest(validator.getDiscussionsListSchema),
   controller.getDiscussions
 );
 
 discussionRoutes.get(
   '/:discussionId',
+  authenticateMiddleware,
   validateRequest(validator.getDiscussionByIdSchema),
   controller.getDiscussionById
 );

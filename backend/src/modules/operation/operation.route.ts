@@ -45,4 +45,11 @@ operationRoutes.patch(
   controller.updateOperation
 );
 
+operationRoutes.delete(
+  '/:operationId',
+  authenticateMiddleware,
+  validateRequest(validator.getOperationByIdSchema),
+  controller.deleteOperation
+);
+
 export default operationRoutes;
