@@ -1,25 +1,25 @@
-# Use a lightweight Node image
-FROM node:20-alpine AS builder
-
-# Set working directory
+# Base node image
+FROM node:20-alpine AS base
 WORKDIR /app
-
-# Copy package files and install dependencies
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
 
-# Copy the rest of the source code
+# Development & Builder Base
+FROM base AS builder
+RUN yarn install --frozen-lockfile
 COPY . .
 
-# Build the frontend (Vite)
+# Development stage
+FROM builder AS development
+EXPOSE 5173
+CMD ["yarn", "run", "dev"]
+
+# Build stage
+FROM builder AS build-compiled
 RUN yarn build
 
-# Serve the built files using a lightweight server (e.g., serve)
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Expose the default port for nginx
+# Production stage
+FROM nginx:alpine AS production
+COPY --from=build-compiled /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]

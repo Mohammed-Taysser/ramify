@@ -1,30 +1,29 @@
-FROM node:20-alpine AS builder
-
+FROM node:20-alpine AS base
 WORKDIR /app
-
 COPY package.json yarn.lock ./
 COPY prisma ./prisma
-RUN yarn install --frozen-lockfile
 
+# Development & Builder Base
+FROM base AS builder
+RUN yarn install --frozen-lockfile && npx prisma generate
 COPY . .
-RUN npx prisma generate
+
+# Development Target
+FROM builder AS development
+EXPOSE 8080
+# Sync schema and then start dev server
+CMD ["sh", "-c", "yarn prisma:push && exec yarn dev"]
+
+# Build Target
+FROM builder AS build-compiled
 RUN yarn build
 
-FROM node:20-alpine
-
-WORKDIR /app
-
-# Copy production dependencies and generated prisma client
-COPY package.json yarn.lock ./
-COPY prisma ./prisma
+# Production Target
+FROM base AS production
 RUN yarn install --production --frozen-lockfile && npx prisma generate
-
-# Copy built assets and required runtime folders
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/docs ./docs
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
-
+COPY --from=build-compiled /app/dist ./dist
+COPY --from=build-compiled /app/docs ./docs
+COPY --from=build-compiled /app/tsconfig.json ./tsconfig.json
 EXPOSE 8080
-
-# Run using validated entries
-CMD ["node", "-r", "tsconfig-paths/register", "dist/src/server.js"]
+# Apply migrations and then start production server
+CMD ["sh", "-c", "yarn prisma:deploy && exec yarn start"]
