@@ -9,6 +9,7 @@ import {
 } from './discussion.validator';
 
 import prisma from '@/apps/prisma';
+import cacheService from '@/services/cache.service';
 import { AuthenticatedRequest } from '@/types/import';
 import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
 import { userSelectBasic } from '@/utils/prisma-selects.utils';
@@ -148,10 +149,31 @@ async function getDiscussionById(request: Request, response: Response) {
     throw new NotFoundError('Discussion not found');
   }
 
+  // Handle root nodes caching
+  let rootResults = await cacheService.getRootNodesCache(discussion.id);
+
+  if (rootResults) {
+    console.log(`[Cache] Serving root nodes results for discussion ${discussion.id} from Redis`);
+  } else {
+    // Calculate and set cache if not found
+    rootResults = (discussion.operations || [])
+      .filter((op) => op.parentId === null)
+      .reduce((acc: Record<number, number>, op) => {
+        acc[op.id] = op.afterValue;
+        return acc;
+      }, {});
+
+    await cacheService.setRootNodesCache(discussion.id, rootResults);
+    console.log(`[Cache] Set root nodes results for discussion ${discussion.id}`);
+  }
+
   sendSuccessResponse({
     response,
     message: 'Discussion found',
-    data: discussion,
+    data: {
+      ...discussion,
+      rootResults, // Include cached/calculated root results
+    },
   });
 }
 
@@ -232,6 +254,9 @@ async function updateDiscussion(request: Request, response: Response) {
     },
   });
 
+  // Invalidate root nodes cache
+  await cacheService.invalidateRootNodesCache(params.discussionId);
+
   sendSuccessResponse({
     response,
     message: 'Discussion updated',
@@ -273,6 +298,9 @@ async function deleteDiscussion(request: Request, response: Response) {
       },
     },
   });
+
+  // Invalidate root nodes cache
+  await cacheService.invalidateRootNodesCache(discussionId);
 
   sendSuccessResponse({
     response,

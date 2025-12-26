@@ -51,6 +51,10 @@ const envSchema = z.object({
   JWT_SECRET: z.string().trim().min(10),
   JWT_ACCESS_EXPIRES_IN: durationSchema,
   JWT_REFRESH_EXPIRES_IN: durationSchema,
+
+  // Redis Configuration
+  REDIS_HOST: z.string().trim().default('localhost'),
+  REDIS_PORT: z.coerce.number().positive().int().default(6379),
 });
 
 /* ----------------------------- Validate Config ---------------------------- */

@@ -10,6 +10,7 @@ import {
 } from './operation.validator';
 
 import prisma from '@/apps/prisma';
+import cacheService from '@/services/cache.service';
 import { AuthenticatedRequest } from '@/types/import';
 import { calculateOperationDepth, validateTreeDepth } from '@/utils/depth.utils';
 import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
@@ -230,6 +231,9 @@ async function createOperation(request: Request, response: Response) {
     },
   });
 
+  // Invalidate root nodes cache
+  await cacheService.invalidateRootNodesCache(discussion.id);
+
   sendSuccessResponse({
     response,
     message: 'Operation created',
@@ -312,6 +316,9 @@ const updateOperation = async (request: Request, response: Response): Promise<vo
     // 8. Recalculate all descendants
     const affectedCount = await operationService.recalculateOperationTree(Number(operationId), tx);
 
+    // 9. Invalidate root nodes cache
+    await cacheService.invalidateRootNodesCache(operation.discussionId);
+
     return { operation: updatedOperation, affectedCount };
   });
 
@@ -350,6 +357,9 @@ async function deleteOperation(request: Request, response: Response) {
   await prisma.operation.delete({
     where: { id: operationId },
   });
+
+  // Invalidate root nodes cache
+  await cacheService.invalidateRootNodesCache(operation.discussionId);
 
   sendSuccessResponse({
     response,
