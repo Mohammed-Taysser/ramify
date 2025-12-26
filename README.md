@@ -128,7 +128,3 @@ ramify/
 - **GitHub**: [@mohammed-taysser](https://github.com/mohammed-taysser)
 - **Email**: [mohammedtaysser983@gmail.com](mailto:mohammedtaysser983@gmail.com)
 - **Portfolio**: [mohammed-taysser.github.io](https://mohammed-taysser.github.io/portfolio)
-
----
-
-_Developed with ❤️ for the Ellty assessment._

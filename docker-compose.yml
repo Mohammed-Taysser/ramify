@@ -29,7 +29,7 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: ellty-postgres
+    container_name: ramify-postgres
     env_file:
       - ./backend/.env
     environment:

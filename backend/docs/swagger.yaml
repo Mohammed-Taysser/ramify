@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Ellty second task
+  title: Ramify second task
   version: 1.0.38
-  description: API documentation for the Ellty second task
+  description: API documentation for the Ramify second task
   contact:
     name: Mohammed Taysser
     url: https://github.com/mohammed-taysser
