@@ -114,10 +114,35 @@ ramify/
 
 ## 🏁 Quick Start
 
-1. **Install Dependencies**: `cd backend && yarn` and `cd frontend && yarn`.
-2. **Infrastructure**: `docker-compose up -d`.
-3. **Initialize DB**: `cd backend && yarn prisma:migrate && yarn prisma:seed`.
-4. **Run**: `yarn dev` in both directories.
+### 1. Development Mode (Live Reload)
+
+Ideal for active coding. Everything runs in Docker with Hot Module Replacement (HMR). Tables are created automatically on startup.
+
+```bash
+docker compose up -d
+
+# Seed the database with demo users (required for first run)
+docker compose exec backend yarn prisma:seed
+```
+
+- **Frontend**: [http://localhost:5173](http://localhost:5173)
+- **Backend**: [http://localhost:8080](http://localhost:8080)
+
+### 2. Production Mode (Optimized)
+
+Ideal for testing final performance and Nginx stability.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+### 🧹 Cleaning Up / Resetting
+
+To wipe everything including the database volumes and start fresh:
+
+```bash
+docker compose down -v
+```
 
 ---
 
