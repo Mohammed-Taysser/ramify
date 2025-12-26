@@ -6,8 +6,10 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.test.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@prisma$': '<rootDir>/prisma/generated',
+    '^@test/(.*)$': '<rootDir>/__tests__/$1',
   },
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/__tests__/**', '!src/app.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/__tests__/**', '!src/server.ts'],
   coverageThreshold: {
     global: {
       branches: 70,

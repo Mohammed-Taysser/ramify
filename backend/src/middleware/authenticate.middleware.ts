@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+
 import prisma from '@/apps/prisma';
 import tokenService from '@/services/token.service';
 import { AuthenticatedRequest } from '@/types/import';
@@ -24,8 +25,8 @@ async function authenticateMiddleware(req: Request, _res: Response, next: NextFu
     let decoded;
     try {
       decoded = tokenService.verifyToken(token.trim());
-    } catch {
-      return next(new UnauthorizedError('Invalid or expired token'));
+    } catch (error) {
+      return next(error);
     }
 
     // Defensive guard
@@ -36,10 +37,6 @@ async function authenticateMiddleware(req: Request, _res: Response, next: NextFu
     // Fetch only required user details (minimal)
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      include: {
-        discussions: true,
-        operations: true,
-      },
     });
 
     if (!user) {

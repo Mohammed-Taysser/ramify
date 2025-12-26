@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Ellty second task
+  title: Ramify second task
   version: 1.0.38
-  description: API documentation for the Ellty second task
+  description: API documentation for the Ramify second task
   contact:
     name: Mohammed Taysser
     url: https://github.com/mohammed-taysser
@@ -12,7 +12,7 @@ info:
     url: https://opensource.org/licenses/MIT
 externalDocs:
   description: GitHub Repository
-  url: https://github.com/mohammed-taysser/ellty-second-task
+  url: https://github.com/mohammed-taysser/ramify
 
 servers:
   - url: /api
@@ -331,14 +331,12 @@ paths:
                       data:
                         $ref: '#/components/schemas/User'
 
-  /users/list:
+  /users/all:
     get:
-      summary: Get a list of users
+      summary: Get all users (non-paginated)
       tags:
         - Users
       parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/LimitParameter'
         - in: query
           name: name
           schema: { type: string, minLength: 3, maxLength: 100 }
@@ -524,14 +522,12 @@ paths:
                       data:
                         $ref: '#/components/schemas/Discussion'
 
-  /discussion/list:
+  /discussion/all:
     get:
-      summary: Get a list of discussions
+      summary: Get all discussions (non-paginated)
       tags:
         - Discussions
       parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/LimitParameter'
         - in: query
           name: title
           schema: { type: string, minLength: 3, maxLength: 100 }
@@ -764,14 +760,12 @@ paths:
                       data:
                         $ref: '#/components/schemas/Operation'
 
-  /operation/list:
+  /operation/all:
     get:
-      summary: Get a list of operations
+      summary: Get all operations (non-paginated)
       tags:
         - Operations
       parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/LimitParameter'
         - in: query
           name: operationType
           schema: { type: string, minLength: 3, maxLength: 100 }
@@ -868,6 +862,50 @@ paths:
                         $ref: '#/components/schemas/Operation'
         '400':
           description: Bad request (e.g., division by zero, no fields provided, discussion ended)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Operation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete an operation
+      description: Deletes an operation and all its descendants due to cascade deletion policy in the database.
+      tags:
+        - Operations
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: operationId
+          required: true
+          schema:
+            type: integer
+          description: ID of the operation to delete
+      responses:
+        '200':
+          description: Operation deleted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: 'Operation deleted successfully'
+                      data:
+                        type: object
+                        nullable: true
+                        example: null
+        '400':
+          description: Cannot delete operation from ended discussion
           content:
             application/json:
               schema:

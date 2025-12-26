@@ -5,7 +5,7 @@ import { basePaginationSchema, dateRangeSchema } from '@/validations/base.valida
 const getUsersListSchema = {
   query: basePaginationSchema.extend({
     name: z.string().trim().min(3).max(100).optional(),
-    email: z.email().max(100).optional(),
+    email: z.string().trim().max(100).optional(),
     createdAt: dateRangeSchema.optional(),
   }),
 };
@@ -19,22 +19,23 @@ const getUserByIdSchema = {
 const createUserSchema = {
   body: z.object({
     name: z.string().trim().min(5).max(100),
-    email: z.email().max(100),
+    email: z.email().trim().max(100),
     password: z.string().trim().min(6).max(100),
   }),
 };
 
 const updateUserSchema = {
+  params: getUserByIdSchema.params,
   body: z.object({
     name: z.string().trim().min(5).max(100).optional(),
-    email: z.email().max(100).optional(),
+    email: z.email().trim().max(100).optional(),
   }),
 };
 
 const updateMeSchema = {
   body: z.object({
     name: z.string().trim().min(5).max(100).optional(),
-    email: z.email().max(100).optional(),
+    email: z.email().trim().max(100).optional(),
   }),
 };
 

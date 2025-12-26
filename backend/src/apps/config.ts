@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 // Load environment-specific .env file based on NODE_ENV
 const envFile = process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
-config({ path: envFile });
+config({ path: envFile, debug: false });
 
 /* ----------------------------- Shared Schemas ----------------------------- */
 
@@ -51,6 +51,10 @@ const envSchema = z.object({
   JWT_SECRET: z.string().trim().min(10),
   JWT_ACCESS_EXPIRES_IN: durationSchema,
   JWT_REFRESH_EXPIRES_IN: durationSchema,
+
+  // Redis Configuration
+  REDIS_HOST: z.string().trim().default('localhost'),
+  REDIS_PORT: z.coerce.number().positive().int().default(6379),
 });
 
 /* ----------------------------- Validate Config ---------------------------- */
@@ -72,7 +76,7 @@ if (!envValidation.success) {
   process.exit(1); // Exit with failure
 }
 
-if (envValidation.data.ALLOWED_ORIGINS.length === 0) {
+if (envValidation.data.ALLOWED_ORIGINS.length === 0 && envValidation.data.NODE_ENV !== 'test') {
   console.warn('\n⚠️  ALLOWED_ORIGINS is empty, CORS is disabled');
 }
 

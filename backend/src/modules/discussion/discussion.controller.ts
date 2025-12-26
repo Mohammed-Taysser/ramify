@@ -1,5 +1,5 @@
+import { Prisma } from '@prisma';
 import { Request, Response } from 'express';
-import { Prisma } from 'prisma/generated';
 
 import {
   CreateDiscussionInput,
@@ -9,8 +9,10 @@ import {
 } from './discussion.validator';
 
 import prisma from '@/apps/prisma';
+import cacheService from '@/services/cache.service';
 import { AuthenticatedRequest } from '@/types/import';
 import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
+import { userSelectBasic } from '@/utils/prisma-selects.utils';
 import { sendPaginatedResponse, sendSuccessResponse } from '@/utils/response.utils';
 
 async function getDiscussions(request: Request, response: Response) {
@@ -49,21 +51,13 @@ async function getDiscussions(request: Request, response: Response) {
       where: filters,
       include: {
         user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: userSelectBasic,
         },
         operations: {
           orderBy: { id: 'asc' },
           include: {
             user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
+              select: userSelectBasic,
             },
           },
         },
@@ -138,21 +132,13 @@ async function getDiscussionById(request: Request, response: Response) {
     where: { id: params.discussionId },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },
@@ -163,10 +149,31 @@ async function getDiscussionById(request: Request, response: Response) {
     throw new NotFoundError('Discussion not found');
   }
 
+  // Handle root nodes caching
+  let rootResults = await cacheService.getRootNodesCache(discussion.id);
+
+  if (rootResults) {
+    console.log(`[Cache] Serving root nodes results for discussion ${discussion.id} from Redis`);
+  } else {
+    // Calculate and set cache if not found
+    rootResults = (discussion.operations || [])
+      .filter((op) => op.parentId === null)
+      .reduce((acc: Record<number, number>, op) => {
+        acc[op.id] = op.afterValue;
+        return acc;
+      }, {});
+
+    await cacheService.setRootNodesCache(discussion.id, rootResults);
+    console.log(`[Cache] Set root nodes results for discussion ${discussion.id}`);
+  }
+
   sendSuccessResponse({
     response,
     message: 'Discussion found',
-    data: discussion,
+    data: {
+      ...discussion,
+      rootResults, // Include cached/calculated root results
+    },
   });
 }
 
@@ -188,21 +195,13 @@ async function createDiscussion(request: Request, response: Response) {
     },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },
@@ -242,26 +241,21 @@ async function updateDiscussion(request: Request, response: Response) {
     },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },
     },
   });
+
+  // Invalidate root nodes cache
+  await cacheService.invalidateRootNodesCache(params.discussionId);
 
   sendSuccessResponse({
     response,
@@ -292,26 +286,21 @@ async function deleteDiscussion(request: Request, response: Response) {
     where: { id: discussionId },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },
     },
   });
+
+  // Invalidate root nodes cache
+  await cacheService.invalidateRootNodesCache(discussionId);
 
   sendSuccessResponse({
     response,
@@ -350,21 +339,13 @@ async function endDiscussion(request: Request, response: Response) {
     },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
       operations: {
         orderBy: { id: 'asc' },
         include: {
           user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+            select: userSelectBasic,
           },
         },
       },

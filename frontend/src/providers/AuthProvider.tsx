@@ -1,7 +1,7 @@
 
 
 import authApi from '@/api/auth.api';
-import { LOCAL_STORAGE_KEYS } from '@/apps/config';
+import { LOCAL_STORAGE_KEYS, SITEMAP } from '@/apps/config';
 import Loader from '@/components/common/Loader';
 import AuthContext from '@/context/auth.context';
 import useApiMessage from '@/hooks/useApiMessage';
@@ -29,8 +29,14 @@ function AuthProvider(props: Readonly<PropsWithChildren>) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchUserInfo();
+    const publicPaths = [SITEMAP.login.path, SITEMAP.register.path, SITEMAP.pageNotFound.path];
+    if (publicPaths.includes(globalThis.location.pathname)) {
+      setIsLoading(false);
+    } else {
+      fetchUserInfo();
+    }
   }, []);
+
 
   const fetchUserInfo = async () => {
     setIsLoading(true);

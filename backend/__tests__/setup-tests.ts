@@ -6,14 +6,11 @@
 // Set NODE_ENV before loading config
 process.env.NODE_ENV = 'test';
 
-// Config will automatically load .env.test based on NODE_ENV
-// No need to manually set environment variables here
+import prisma from '@/apps/prisma';
 
 // Set test timeout
 jest.setTimeout(10000);
 
-// Global teardown
 afterAll(async () => {
-  // Close any open connections
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  await prisma.$disconnect();
 });

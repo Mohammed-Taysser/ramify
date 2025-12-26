@@ -2,10 +2,11 @@ import discussionApi from '@/api/discussion.api';
 import operationApi from '@/api/operation.api';
 import { SITEMAP } from '@/apps/config';
 import DiscussionTree from '@/components/DiscussionTree';
-import OperationForm from '@/components/OperationForm';
+import OperationModal from '@/components/OperationModal';
+import TreeVisualization from '@/components/TreeVisualization';
 import useApiMessage from '@/hooks/useApiMessage';
 import { buildOperationTree, type TreeOperation } from '@/utils/tree.utils';
-import { Button, Card, Col, Empty, Modal, Row, Skeleton, Space, Tag, Typography } from 'antd';
+import { App, Button, Card, Col, Empty, Row, Segmented, Skeleton, Space, Tag, Typography } from 'antd';
 import { ArrowLeft, Calculator, MessageSquare, Plus } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -17,6 +18,8 @@ const DiscussionDetail = () => {
 
   const { displayErrorMessages } = useApiMessage();
 
+  const app = App.useApp();
+
   const [showOperationForm, setShowOperationForm] = useState(false);
   const [selectedParentId, setSelectedParentId] = useState<number | null>();
 
@@ -24,6 +27,7 @@ const DiscussionDetail = () => {
   const [fetchedDiscussion, setFetchedDiscussion] = useState<Maybe<Discussion>>();
 
   const [editingOperation, setEditingOperation] = useState<TreeOperation | null>(null);
+  const [viewMode, setViewMode] = useState<'timeline' | 'tree'>('timeline');
 
   useEffect(() => {
     if (discussionId && !Number.isNaN(Number(discussionId))) {
@@ -101,7 +105,7 @@ const DiscussionDetail = () => {
         });
       } else {
         await operationApi.create({
-          operation: type,
+          operationType: type,
           value: operand,
           parentId: selectedParentId,
           discussionId: fetchedDiscussion.id,
@@ -126,51 +130,56 @@ const DiscussionDetail = () => {
     setShowOperationForm(true);
   };
 
+  const onEndDiscussionBtnClick = () => {
+    app.modal.confirm({
+      title: 'End Discussion',
+      content: 'Are you sure you want to end this discussion?',
+      onOk: handleEndDiscussion,
+      okButtonProps: {
+        danger: true,
+      },
+    });
+  };
+
   const operationTree = useMemo(() => {
     if (!fetchedDiscussion?.operations) return [];
     return buildOperationTree(fetchedDiscussion.operations);
   }, [fetchedDiscussion]);
+
+  const getModalCurrentValue = () => {
+    if (editingOperation) return editingOperation.beforeValue;
+    if (selectedParentId === null || selectedParentId === undefined) {
+      return fetchedDiscussion?.startingValue || 0;
+    }
+    const parentOp = fetchedDiscussion?.operations.find((op) => op.id === selectedParentId);
+    return parentOp?.afterValue || 0;
+  };
 
   return (
     <div
       className="min-h-screen"
       style={{ backgroundColor: '#f5f5f5' }}
     >
-      <Modal
+      <OperationModal
         open={showOperationForm}
-        onCancel={() => {
+        onClose={() => {
           setShowOperationForm(false);
           setEditingOperation(null);
           setSelectedParentId(undefined);
         }}
-        footer={null}
-      >
-        <OperationForm
-          currentValue={
-            editingOperation
-              ? editingOperation.beforeValue
-              : selectedParentId === null || selectedParentId === undefined
-                ? fetchedDiscussion?.startingValue || 0
-                : fetchedDiscussion?.operations.find((op) => op.id === selectedParentId)?.afterValue || 0
-          }
-          initialValues={
-            editingOperation
-              ? {
-                type: editingOperation.operationType,
-                operand: editingOperation.value,
-                title: editingOperation.title || '',
-              }
-              : undefined
-          }
-          mode={editingOperation ? 'edit' : 'create'}
-          onSubmit={handleOperationSubmit}
-          onCancel={() => {
-            setShowOperationForm(false);
-            setEditingOperation(null);
-            setSelectedParentId(undefined);
-          }}
-        />
-      </Modal>
+        currentValue={getModalCurrentValue()}
+        initialValues={
+          editingOperation
+            ? {
+              type: editingOperation.operationType,
+              operand: editingOperation.value,
+              title: editingOperation.title || '',
+            }
+            : undefined
+        }
+        mode={editingOperation ? 'edit' : 'create'}
+        onSubmit={handleOperationSubmit}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
@@ -227,29 +236,31 @@ const DiscussionDetail = () => {
                       strong
                       className={`text-xl font-mono transition-colors duration-300`}
                     >
-                      Current: {currentValue.toFixed(2)}
+                      Latest Result: {currentValue.toFixed(2)}
                     </Text>
                   </Space>
                 </Col>
 
                 <Col>
-                  <Button
-                    type="primary"
-                    size="large"
-                    onClick={handleAddRootOperation}
-                    icon={<Plus className="h-5 w-5" />}
-                    disabled={!!fetchedDiscussion?.isEnded}
-                  >
-                    Add Root Operation
-                  </Button>
-
-                  {fetchedDiscussion?.isEnded ? (
-                    <Tag color="red">Ended</Tag>
-                  ) : (
-                    <Button type="primary" danger onClick={handleEndDiscussion}>
-                      End Discussion
+                  <Space>
+                    <Button
+                      type="primary"
+                      size="large"
+                      onClick={handleAddRootOperation}
+                      icon={<Plus className="h-5 w-5" />}
+                      disabled={!!fetchedDiscussion?.isEnded}
+                    >
+                      Add Root Operation
                     </Button>
-                  )}
+
+                    {fetchedDiscussion?.isEnded ? (
+                      <Tag color="red">Ended</Tag>
+                    ) : (
+                      <Button size="large" type="dashed" danger onClick={onEndDiscussionBtnClick}>
+                        End Discussion
+                      </Button>
+                    )}
+                  </Space>
                 </Col>
               </Row>
 
@@ -280,12 +291,33 @@ const DiscussionDetail = () => {
                     </Empty>
                   </div>
                 ) : (
-                  <DiscussionTree
-                    operations={operationTree}
-                    onAddChild={handleAddChildOperation}
-                    onEdit={handleEditOperation}
-                    isEnded={fetchedDiscussion?.isEnded}
-                  />
+                  <>
+                    <div className="flex justify-center mb-4">
+                      <Segmented
+                        options={[
+                          { label: 'Timeline View', value: 'timeline' },
+                          { label: 'Tree View', value: 'tree' },
+                        ]}
+                        value={viewMode}
+                        onChange={(value) => setViewMode(value as 'timeline' | 'tree')}
+                      />
+                    </div>
+                    {viewMode === 'timeline' ? (
+                      <DiscussionTree
+                        operations={operationTree}
+                        onAddChild={handleAddChildOperation}
+                        onEdit={handleEditOperation}
+                        isEnded={fetchedDiscussion?.isEnded}
+                      />
+                    ) : (
+                      <TreeVisualization
+                        operations={operationTree}
+                        onAddChild={handleAddChildOperation}
+                        onEdit={handleEditOperation}
+                        isEnded={fetchedDiscussion?.isEnded}
+                      />
+                    )}
+                  </>
                 )}
               </Card>
             </>

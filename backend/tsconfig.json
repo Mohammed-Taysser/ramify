@@ -15,7 +15,9 @@
     "emitDecoratorMetadata": true,
     "noImplicitAny": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@prisma": ["prisma/generated"],
+      "@test/*": ["__tests__/*"]
     }
   },
   "include": ["src", "__tests__", "prisma"],

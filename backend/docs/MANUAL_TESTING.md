@@ -23,61 +23,6 @@ curl -X POST http://localhost:8080/api/auth/login \
 export TOKEN="<your-token-here>"
 ```
 
-## Test 1: Decimal Precision
-
-**Objective:** Verify that calculations use exact decimal arithmetic
-
-```bash
-# Step 1: Create discussion with decimal starting value
-curl -X POST http://localhost:8080/api/discussions \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Decimal Precision Test",
-    "startingValue": 0.1
-  }' | jq
-
-# Note the discussion ID from response
-export DISCUSSION_ID=<discussion-id>
-
-# Step 2: Add 0.2 (should equal exactly 0.3)
-curl -X POST http://localhost:8080/api/operations \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"discussionId\": $DISCUSSION_ID,
-    \"operation\": \"ADD\",
-    \"value\": 0.2,
-    \"title\": \"Add 0.2\"
-  }" | jq
-
-# Step 3: Verify result is exactly 0.3
-curl http://localhost:8080/api/discussions/$DISCUSSION_ID | jq '.data.operations[0].afterValue'
-
-# Expected: "0.3" (not "0.30000000000000004")
-
-# Step 4: Multiply by 3 (should equal exactly 0.9)
-curl -X POST http://localhost:8080/api/operations \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"parentId\": <operation-id-from-step-2>,
-    \"operation\": \"MULTIPLY\",
-    \"value\": 3,
-    \"title\": \"Multiply by 3\"
-  }" | jq
-
-# Expected afterValue: "0.9" (exactly)
-```
-
-**Success Criteria:**
-
-- ✅ `0.1 + 0.2 = 0.3` (exactly)
-- ✅ `0.3 × 3 = 0.9` (exactly)
-- ✅ No floating-point precision errors
-
----
-
 ## Test 2: Rate Limiting
 
 **Objective:** Verify creation endpoints are rate-limited to 10 requests/minute
@@ -135,8 +80,6 @@ curl -I -X POST http://localhost:8080/api/discussions \
 # RateLimit-Reset: <timestamp>
 ```
 
----
-
 ## Test 3: Input Validation (NaN/Infinity)
 
 **Objective:** Verify that invalid numbers are rejected
@@ -167,28 +110,13 @@ curl -X POST http://localhost:8080/api/operations \
 
 # Expected: HTTP 400
 # Expected message: "Value must be a valid finite number"
-
-# Test 3.3: Valid decimal string
-curl -X POST http://localhost:8080/api/operations \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "discussionId": 1,
-    "operation": "ADD",
-    "value": "123.456"
-  }'
-
-# Expected: HTTP 201 (success)
 ```
 
 **Success Criteria:**
 
 - ✅ NaN is rejected with 400
 - ✅ Infinity is rejected with 400
-- ✅ Valid decimal strings are accepted
 - ✅ Error messages are descriptive
-
----
 
 ## Test 4: Division by Zero Protection
 
@@ -214,8 +142,6 @@ curl -X POST http://localhost:8080/api/operations \
 - ✅ Returns HTTP 400
 - ✅ Clear error message
 - ✅ No operation created
-
----
 
 ## Test 5: Tree Depth Validation
 
@@ -270,8 +196,6 @@ done
 - ✅ Levels 1-10: HTTP 201 (success)
 - ✅ Level 11: HTTP 400 (rejected)
 - ✅ Error: "Maximum tree depth of 10 exceeded"
-
----
 
 ## Test 6: Calculation Cascading
 
@@ -332,8 +256,6 @@ curl -s http://localhost:8080/api/operations/$OP3 | jq '.data.afterValue'
 - ✅ After update: 42
 - ✅ Update message includes "descendant(s) recalculated"
 
----
-
 ## Automated Test Alternative
 
 For automated regression testing, use the Jest test suite (once implemented):
@@ -350,8 +272,6 @@ yarn test operation.service.test.ts
 yarn test:coverage
 ```
 
----
-
 ## Troubleshooting
 
 **Issue:** Rate limit not working
@@ -359,17 +279,10 @@ yarn test:coverage
 - **Solution:** Check if `creationRateLimiter` is applied in route files
 - **Verify:** Headers should include `RateLimit-*`
 
-**Issue:** Decimal precision still wrong
-
-- **Solution:** Check Prisma migration was applied: `yarn prisma:migrate`
-- **Verify:** Database columns should be `DECIMAL(20,10)`
-
 **Issue:** Token expired
 
 - **Solution:** Login again to get fresh token
 - **Note:** Tokens expire after configured JWT lifetime
-
----
 
 ## Quick Reference
 

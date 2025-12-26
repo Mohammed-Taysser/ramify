@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -8,7 +9,6 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
-import { Prisma } from 'prisma/generated';
 
 import { DateRangeInput } from '@/validations/base.validation';
 

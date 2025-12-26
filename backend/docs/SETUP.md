@@ -14,7 +14,7 @@ Before you begin, ensure you have the following installed:
 ## Project Structure
 
 ```text
-ellty-second-task/
+ramify/
 ├── backend/          # Node.js + Express + Prisma API
 ├── frontend/         # React + Vite frontend
 └── docker-compose.yml # PostgreSQL database
@@ -46,7 +46,7 @@ cp .env.example .env
 
 | Variable                 | Description                                                                      | Example                                                                        |
 | ------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `DATABASE_URL`           | Full database connection string                                                  | `postgresql://ellty_user:ellty_password@localhost:5432/ellty_db?schema=public` |
+| `DATABASE_URL`           | Full database connection string                                                  | `postgresql://ramify_user:ramify_password@localhost:5432/ramify_db?schema=public` |
 | `SEED_USER_PASSWORD`     | Password for demo users (min 8 chars, must contain uppercase, lowercase, number) | `Demo@123456`                                                                  |
 | `JWT_SECRET`             | Secret key for JWT tokens                                                        | `your-super-secret-jwt-key`                                                    |
 | `JWT_ACCESS_EXPIRES_IN`  | Access token expiration                                                          | `1d`                                                                           |
@@ -70,7 +70,7 @@ docker-compose up -d
 This will:
 
 - Pull the PostgreSQL 16 Alpine image
-- Create a PostgreSQL container named `ellty-postgres`
+- Create a PostgreSQL container named `ramify-postgres`
 - Expose PostgreSQL on port `5432`
 - Create a persistent volume for data
 
@@ -80,7 +80,7 @@ This will:
 docker ps
 ```
 
-You should see `ellty-postgres` in the list.
+You should see `ramify-postgres` in the list.
 
 **Check database health:**
 
@@ -248,7 +248,7 @@ SEED_USER_PASSWORD=Demo@123456
 3. Test connection manually:
 
    ```bash
-   docker exec -it ellty-postgres psql -U ellty_user -d ellty_db
+   docker exec -it ramify-postgres psql -U ramify_user -d ramify_db
    ```
 
 ### Issue: Seed Script Fails
@@ -304,7 +304,7 @@ This will:
 | `docker-compose down -v`                                        | Stop containers and remove volumes (deletes data) |
 | `docker-compose logs postgres`                                  | View PostgreSQL logs                              |
 | `docker-compose restart postgres`                               | Restart PostgreSQL                                |
-| `docker exec -it ellty-postgres psql -U ellty_user -d ellty_db` | Access PostgreSQL CLI                             |
+| `docker exec -it ramify-postgres psql -U ramify_user -d ramify_db` | Access PostgreSQL CLI                             |
 
 ## Development Workflow
 
@@ -453,6 +453,6 @@ DATABASE_URL="postgresql://user:pass@localhost:5432/db?connection_limit=10&pool_
 
 If you encounter any issues not covered in this guide, please:
 
-1. Check the [GitHub Issues](https://github.com/mohammed-taysser/ellty-second-task/issues)
+1. Check the [GitHub Issues](https://github.com/mohammed-taysser/ramify/issues)
 2. Review the application logs
 3. Ensure all prerequisites are correctly installed

@@ -2,6 +2,8 @@
  * Constants and utilities for managing operation tree depth
  */
 
+import { BadRequestError } from './errors.utils';
+
 /**
  * Maximum allowed tree depth
  * NOTE: This is currently a constant, but could be made configurable
@@ -22,12 +24,12 @@ export function calculateOperationDepth(parentDepth: number): number {
  * Validate if adding a new operation would exceed max depth
  * @param parentDepth - The depth of the parent operation
  * @param maxDepth - Optional custom max depth (defaults to MAX_TREE_DEPTH)
- * @throws Error if depth would exceed maxDepth
+ * @throws BadRequestError if depth would exceed maxDepth
  */
 export function validateTreeDepth(parentDepth: number, maxDepth: number = MAX_TREE_DEPTH): void {
   const newDepth = calculateOperationDepth(parentDepth);
   if (newDepth > maxDepth) {
-    throw new Error(
+    throw new BadRequestError(
       `Maximum tree depth of ${maxDepth} exceeded. Cannot add operation at depth ${newDepth}.`
     );
   }

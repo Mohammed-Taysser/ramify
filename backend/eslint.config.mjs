@@ -20,6 +20,7 @@ export default defineConfig([
     rules: {
       ...sonarjs.configs.recommended.rules,
       ...securityNode.configs.recommended.rules,
+      'security-node/detect-crlf': 'off',
     },
   },
 
@@ -50,6 +51,7 @@ export default defineConfig([
         { type: 'middleware', pattern: 'src/middleware/*' },
         { type: 'utils', pattern: 'src/utils/*' },
         { type: 'app', pattern: 'src/app.ts' },
+        { type: 'server', pattern: 'src/server.ts' },
       ],
       'boundaries/ignore': ['**/*.test.ts', '**/*.d.ts'], // optional
     },
@@ -65,7 +67,7 @@ export default defineConfig([
       ],
 
       // Prettier integration
-      'prettier/prettier': 'error',
+      'prettier/prettier': 'warn',
 
       // TypeScript unused vars
       '@typescript-eslint/no-unused-vars': ['error'],

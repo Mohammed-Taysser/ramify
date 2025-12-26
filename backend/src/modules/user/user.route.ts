@@ -16,7 +16,7 @@ userRoutes.patch(
 );
 userRoutes.get('/me', authenticateMiddleware, controller.getProfile);
 
-userRoutes.get('/list', validateRequest(validator.getUsersListSchema), controller.getUsersList);
+userRoutes.get('/all', validateRequest(validator.getUsersListSchema), controller.getUsersList);
 userRoutes.get('/', validateRequest(validator.getUsersListSchema), controller.getUsers);
 
 userRoutes.get('/:userId', validateRequest(validator.getUserByIdSchema), controller.getUserById);
@@ -34,6 +34,11 @@ userRoutes.patch(
   validateRequest(validator.updateUserSchema),
   controller.updateUser
 );
-userRoutes.delete('/:userId', authenticateMiddleware, controller.deleteUser);
+userRoutes.delete(
+  '/:userId',
+  authenticateMiddleware,
+  validateRequest(validator.getUserByIdSchema),
+  controller.deleteUser
+);
 
 export default userRoutes;

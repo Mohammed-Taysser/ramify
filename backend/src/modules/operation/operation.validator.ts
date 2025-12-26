@@ -1,20 +1,8 @@
-import { OPERATION_TYPE } from 'prisma/generated';
+import { OPERATION_TYPE } from '@prisma';
 import { z } from 'zod';
 
 import { zodParseEnumList } from '@/utils/zod-utils';
 import { basePaginationSchema } from '@/validations/base.validation';
-
-// Custom validation for decimal numbers
-const decimalNumber = z
-  .number()
-  .or(z.string().transform((val) => Number.parseFloat(val)))
-  .refine((val) => !Number.isNaN(val) && Number.isFinite(val), {
-    message: 'Value must be a valid finite number',
-  })
-  .refine((val) => Math.abs(val) <= Number.MAX_SAFE_INTEGER, {
-    message: 'Value exceeds safe number range',
-  })
-  .transform(Number);
 
 const getOperationsListSchema = {
   query: basePaginationSchema.extend({
@@ -31,11 +19,11 @@ const getOperationByIdSchema = {
 const createOperationSchema = {
   body: z
     .object({
-      operation: z.enum(OPERATION_TYPE),
-      value: decimalNumber,
+      operationType: z.enum(OPERATION_TYPE),
+      value: z.coerce.number(),
       parentId: z.coerce.number().positive().int().nullable().optional(),
       discussionId: z.coerce.number().positive().int().optional(),
-      title: z.string().min(1).max(200).optional(),
+      title: z.string().trim().min(1).max(200).optional(),
     })
     .refine((data) => data.parentId !== null || data.discussionId !== undefined, {
       message: 'Either parentId or discussionId must be provided',
@@ -48,9 +36,9 @@ const updateOperationSchema = {
   }),
   body: z
     .object({
-      value: decimalNumber.optional(),
+      value: z.coerce.number().optional(),
       operationType: z.enum(OPERATION_TYPE).optional(),
-      title: z.string().min(1).max(200).optional(),
+      title: z.string().trim().min(1).max(200).optional(),
     })
     .refine(
       (data) => {

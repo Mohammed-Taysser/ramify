@@ -10,18 +10,22 @@ import validateRequest from '@/middleware/validate-request.middleware';
 const operationRoutes = Router();
 
 operationRoutes.get(
-  '/list',
+  '/all',
+  authenticateMiddleware,
   validateRequest(validator.getOperationsListSchema),
   controller.getOperationsList
 );
+
 operationRoutes.get(
   '/',
+  authenticateMiddleware,
   validateRequest(validator.getOperationsListSchema),
   controller.getOperations
 );
 
 operationRoutes.get(
   '/:operationId',
+  authenticateMiddleware,
   validateRequest(validator.getOperationByIdSchema),
   controller.getOperationById
 );
@@ -39,6 +43,13 @@ operationRoutes.patch(
   authenticateMiddleware,
   validateRequest(validator.updateOperationSchema),
   controller.updateOperation
+);
+
+operationRoutes.delete(
+  '/:operationId',
+  authenticateMiddleware,
+  validateRequest(validator.getOperationByIdSchema),
+  controller.deleteOperation
 );
 
 export default operationRoutes;

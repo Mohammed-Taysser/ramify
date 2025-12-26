@@ -12,7 +12,7 @@ interface Operation extends BaseEntity {
 }
 
 interface CreateOperationPayload {
-  operation: OperationType;
+  operationType: OperationType;
   value: number;
   parentId?: number | null;
   discussionId?: number;

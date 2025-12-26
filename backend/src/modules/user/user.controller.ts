@@ -1,5 +1,5 @@
+import { Prisma } from '@prisma';
 import { Request, Response } from 'express';
-import { Prisma } from 'prisma/generated';
 
 import {
   CreateUserInput,
@@ -14,6 +14,7 @@ import tokenService from '@/services/token.service';
 import { AuthenticatedRequest } from '@/types/import';
 import { buildDateRangeFilter } from '@/utils/dayjs.utils';
 import { ConflictError, NotFoundError } from '@/utils/errors.utils';
+import { userSelectFull } from '@/utils/prisma-selects.utils';
 import { sendPaginatedResponse, sendSuccessResponse } from '@/utils/response.utils';
 
 async function getUsers(request: Request, response: Response) {
@@ -52,13 +53,7 @@ async function getUsers(request: Request, response: Response) {
       take: query.limit,
       orderBy: { createdAt: 'desc' },
       where: filters,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: userSelectFull,
     }),
     prisma.user.count({
       where: filters,
@@ -103,11 +98,7 @@ async function getUsersList(request: Request, response: Response) {
   }
 
   const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-    },
+    select: userSelectFull,
     where: filters,
   });
 
@@ -126,13 +117,7 @@ async function getUserById(request: Request, response: Response) {
 
   const user = await prisma.user.findUnique({
     where: { id: params.userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: userSelectFull,
   });
 
   if (!user) {
@@ -184,13 +169,7 @@ async function createUser(request: Request, response: Response) {
       ...body,
       password: hashed,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: userSelectFull,
   });
 
   sendSuccessResponse({
@@ -224,13 +203,7 @@ async function updateUser(request: Request, response: Response) {
     data: {
       ...body,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: userSelectFull,
   });
 
   sendSuccessResponse({
@@ -263,13 +236,7 @@ async function updateMe(request: Request, response: Response) {
     data: {
       ...authenticatedRequest.body,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: userSelectFull,
   });
 
   sendSuccessResponse({
@@ -299,13 +266,7 @@ async function deleteUser(request: Request, response: Response) {
 
   const deletedUser = await prisma.user.delete({
     where: { id: userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: userSelectFull,
   });
 
   sendSuccessResponse({

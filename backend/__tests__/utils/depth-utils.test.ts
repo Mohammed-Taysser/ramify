@@ -1,6 +1,5 @@
-import { describe, expect, it } from '@jest/globals';
-
 import { calculateOperationDepth, MAX_TREE_DEPTH, validateTreeDepth } from '@/utils/depth.utils';
+import { BadRequestError } from '@/utils/errors.utils';
 
 describe('Depth Utilities', () => {
   describe('calculateOperationDepth', () => {
@@ -17,6 +16,11 @@ describe('Depth Utilities', () => {
     it('should handle large depth values', () => {
       const depth = calculateOperationDepth(99);
       expect(depth).toBe(100);
+    });
+
+    it('should handle zero parent depth', () => {
+      const depth = calculateOperationDepth(0);
+      expect(depth).toBeGreaterThan(0);
     });
   });
 
@@ -38,11 +42,11 @@ describe('Depth Utilities', () => {
     it('should reject operations exceeding max depth', () => {
       expect(() => {
         validateTreeDepth(MAX_TREE_DEPTH); // depth will be MAX_TREE_DEPTH + 1
-      }).toThrow();
+      }).toThrow(BadRequestError);
 
       expect(() => {
         validateTreeDepth(MAX_TREE_DEPTH + 5);
-      }).toThrow();
+      }).toThrow(BadRequestError);
     });
 
     it('should include depth information in error message', () => {
@@ -50,7 +54,7 @@ describe('Depth Utilities', () => {
         validateTreeDepth(MAX_TREE_DEPTH);
         fail('Should have thrown error');
       } catch (error) {
-        expect(error).toBeInstanceOf(Error);
+        expect(error).toBeInstanceOf(BadRequestError);
         expect((error as Error).message).toContain(
           `Maximum tree depth of ${MAX_TREE_DEPTH} exceeded`
         );
@@ -69,17 +73,37 @@ describe('Depth Utilities', () => {
       // Should reject beyond custom max
       expect(() => {
         validateTreeDepth(customMax, customMax);
-      }).toThrow();
+      }).toThrow(BadRequestError);
     });
 
     it('should use default MAX_TREE_DEPTH when not provided', () => {
       expect(() => {
         validateTreeDepth(MAX_TREE_DEPTH);
-      }).toThrow();
+      }).toThrow(BadRequestError);
 
       expect(() => {
         validateTreeDepth(MAX_TREE_DEPTH - 1);
       }).not.toThrow();
+    });
+
+    it('should throw BadRequestError with correct status code', () => {
+      try {
+        validateTreeDepth(MAX_TREE_DEPTH);
+        fail('Should have thrown error');
+      } catch (error) {
+        expect(error).toBeInstanceOf(BadRequestError);
+        expect((error as BadRequestError).statusCode).toBe(400);
+      }
+    });
+
+    it('should handle edge case at exactly max depth', () => {
+      expect(() => {
+        validateTreeDepth(MAX_TREE_DEPTH - 1);
+      }).not.toThrow();
+
+      expect(() => {
+        validateTreeDepth(MAX_TREE_DEPTH);
+      }).toThrow();
     });
   });
 
@@ -91,6 +115,11 @@ describe('Depth Utilities', () => {
     it('should be a positive integer', () => {
       expect(MAX_TREE_DEPTH).toBeGreaterThan(0);
       expect(Number.isInteger(MAX_TREE_DEPTH)).toBe(true);
+    });
+
+    it('should be a reasonable value for tree depth', () => {
+      expect(MAX_TREE_DEPTH).toBeGreaterThanOrEqual(5);
+      expect(MAX_TREE_DEPTH).toBeLessThanOrEqual(100);
     });
   });
 });

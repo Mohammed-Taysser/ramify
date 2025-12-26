@@ -10,18 +10,22 @@ import validateRequest from '@/middleware/validate-request.middleware';
 const discussionRoutes = Router();
 
 discussionRoutes.get(
-  '/list',
+  '/all',
+  authenticateMiddleware,
   validateRequest(validator.getDiscussionsListSchema),
   controller.getDiscussionsList
 );
+
 discussionRoutes.get(
   '/',
+  authenticateMiddleware,
   validateRequest(validator.getDiscussionsListSchema),
   controller.getDiscussions
 );
 
 discussionRoutes.get(
   '/:discussionId',
+  authenticateMiddleware,
   validateRequest(validator.getDiscussionByIdSchema),
   controller.getDiscussionById
 );
@@ -48,6 +52,11 @@ discussionRoutes.post(
   controller.endDiscussion
 );
 
-discussionRoutes.delete('/:discussionId', authenticateMiddleware, controller.deleteDiscussion);
+discussionRoutes.delete(
+  '/:discussionId',
+  authenticateMiddleware,
+  validateRequest(validator.getDiscussionByIdSchema),
+  controller.deleteDiscussion
+);
 
 export default discussionRoutes;

@@ -1,5 +1,5 @@
+import { Prisma } from '@prisma';
 import { Request, Response } from 'express';
-import { Prisma } from 'prisma/generated';
 
 import operationService from './operation.service';
 import {
@@ -10,8 +10,11 @@ import {
 } from './operation.validator';
 
 import prisma from '@/apps/prisma';
+import cacheService from '@/services/cache.service';
 import { AuthenticatedRequest } from '@/types/import';
+import { calculateOperationDepth, validateTreeDepth } from '@/utils/depth.utils';
 import { BadRequestError, NotFoundError } from '@/utils/errors.utils';
+import { userSelectBasic } from '@/utils/prisma-selects.utils';
 import { sendPaginatedResponse, sendSuccessResponse } from '@/utils/response.utils';
 
 async function getOperations(request: Request, response: Response) {
@@ -42,11 +45,7 @@ async function getOperations(request: Request, response: Response) {
       where: filters,
       include: {
         user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: userSelectBasic,
         },
       },
     }),
@@ -111,11 +110,7 @@ async function getOperationById(request: Request, response: Response) {
     where: { id: params.operationId },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
     },
   });
@@ -141,29 +136,32 @@ async function createOperation(request: Request, response: Response) {
 
   const { body, user } = authenticatedRequest;
 
+  // Determine beforeValue and depth based on parent or discussion
   let beforeValue: number;
-  let discussionId: number;
+  let depth: number;
+  let discussion: Awaited<ReturnType<typeof prisma.discussion.findUnique>>; // To store the full discussion object
 
-  if (body.parentId === null || body.parentId === undefined) {
-    // Root operation: get starting value from discussion
-    if (!body.discussionId) {
-      throw new BadRequestError('discussionId is required for root operations');
-    }
+  const parentId = body.parentId;
 
-    const discussion = await prisma.discussion.findUnique({
-      where: { id: body.discussionId },
-    });
-
-    if (!discussion) {
-      throw new NotFoundError('Discussion not found');
-    }
-
-    beforeValue = discussion.startingValue;
-    discussionId = discussion.id;
-  } else {
-    // Child operation: get value from parent
+  if (parentId) {
     const parentOperation = await prisma.operation.findUnique({
-      where: { id: body.parentId },
+      where: { id: parentId },
+      select: {
+        afterValue: true,
+        depth: true,
+        discussion: {
+          select: {
+            id: true,
+            title: true,
+            startingValue: true,
+            createdBy: true,
+            createdAt: true,
+            updatedAt: true,
+            isEnded: true,
+            endedAt: true,
+          },
+        },
+      },
     });
 
     if (!parentOperation) {
@@ -171,62 +169,70 @@ async function createOperation(request: Request, response: Response) {
     }
 
     beforeValue = parentOperation.afterValue;
-    discussionId = parentOperation.discussionId;
+    depth = calculateOperationDepth(parentOperation.depth);
+    discussion = parentOperation.discussion;
+
+    // Validate depth doesn't exceed maximum
+    validateTreeDepth(parentOperation.depth);
+  } else {
+    // Root operation: get starting value from discussion
+    if (!body.discussionId) {
+      throw new BadRequestError('discussionId is required for root operations');
+    }
+
+    discussion = await prisma.discussion.findUnique({
+      where: { id: body.discussionId },
+    });
+
+    if (!discussion) {
+      throw new NotFoundError('Discussion not found');
+    }
+    beforeValue = discussion.startingValue;
+    depth = 1; // Root operation has depth 1
   }
 
   // Check if discussion is ended
-  const discussion = await prisma.discussion.findUnique({
-    where: { id: discussionId },
-    select: { isEnded: true },
-  });
-
   if (discussion?.isEnded) {
     throw new BadRequestError('Cannot add operation to an ended discussion');
   }
 
   // Validate division by zero
-  if (body.operation === 'DIVIDE' && body.value === 0) {
+  if (body.operationType === 'DIVIDE' && body.value === 0) {
     throw new BadRequestError('Cannot divide by zero');
   }
 
-  // Calculate afterValue based on operation type
-  let afterValue = beforeValue;
-  switch (body.operation) {
-    case 'ADD':
-      afterValue = beforeValue + body.value;
-      break;
-    case 'SUBTRACT':
-      afterValue = beforeValue - body.value;
-      break;
-    case 'MULTIPLY':
-      afterValue = beforeValue * body.value;
-      break;
-    case 'DIVIDE':
-      afterValue = beforeValue / body.value;
-      break;
-  }
+  // Calculate the afterValue based on operation type
+  const operationType = body.operationType;
+  const operationValue = body.value;
 
+  const afterValue = operationService.calculateOperation(
+    beforeValue,
+    operationType,
+    operationValue
+  );
+
+  // Create the operation
   const operation = await prisma.operation.create({
     data: {
-      discussionId,
+      discussionId: discussion.id,
       parentId: body.parentId || null,
-      title: body.title || `${body.operation} ${body.value}`,
-      operationType: body.operation,
+      title: body.title || `${body.operationType} ${body.value}`,
+      operationType: body.operationType,
       value: body.value,
       beforeValue,
       afterValue,
+      depth,
       createdBy: user.id,
     },
     include: {
       user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: userSelectBasic,
       },
     },
   });
+
+  // Invalidate root nodes cache
+  await cacheService.invalidateRootNodesCache(discussion.id);
 
   sendSuccessResponse({
     response,
@@ -263,7 +269,6 @@ const updateOperation = async (request: Request, response: Response): Promise<vo
     // 3. Determine new values (use provided or keep existing)
     const newValue = body.value ?? operation.value;
     const newType = body.operationType ?? operation.operationType;
-    const newTitle = body.title ?? operation.title;
 
     // 4. Validate division by zero
     if (newType === 'DIVIDE' && newValue === 0) {
@@ -283,31 +288,36 @@ const updateOperation = async (request: Request, response: Response): Promise<vo
     }
 
     // 6. Calculate new afterValue for this operation
-    const newAfterValue = operationService.calculateOperation(parent.afterValue, newType, newValue);
+    const newTypeForCalc = body.operationType || operation.operationType;
+    const newValueForCalc = body.value ?? operation.value;
+    const newAfterValue = operationService.calculateOperation(
+      parent.afterValue,
+      newTypeForCalc,
+      newValueForCalc
+    );
 
     // 7. Update the operation itself
     const updatedOperation = await tx.operation.update({
       where: { id: Number(operationId) },
       data: {
-        value: newValue,
-        operationType: newType,
-        title: newTitle,
+        title: body.title,
+        operationType: body.operationType,
+        value: body.value,
         beforeValue: parent.afterValue,
         afterValue: newAfterValue,
       },
       include: {
         user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: userSelectBasic,
         },
       },
     });
 
     // 8. Recalculate all descendants
     const affectedCount = await operationService.recalculateOperationTree(Number(operationId), tx);
+
+    // 9. Invalidate root nodes cache
+    await cacheService.invalidateRootNodesCache(operation.discussionId);
 
     return { operation: updatedOperation, affectedCount };
   });
@@ -320,9 +330,48 @@ const updateOperation = async (request: Request, response: Response): Promise<vo
   });
 };
 
+async function deleteOperation(request: Request, response: Response) {
+  const authenticatedRequest = request as unknown as AuthenticatedRequest<
+    GetOperationByIdParams,
+    unknown,
+    unknown,
+    unknown
+  >;
+
+  const { params } = authenticatedRequest;
+  const operationId = Number(params.operationId);
+
+  const operation = await prisma.operation.findUnique({
+    where: { id: operationId },
+    include: { discussion: true },
+  });
+
+  if (!operation) {
+    throw new NotFoundError('Operation not found');
+  }
+
+  if (operation.discussion.isEnded) {
+    throw new BadRequestError('Cannot delete operation from ended discussion');
+  }
+
+  await prisma.operation.delete({
+    where: { id: operationId },
+  });
+
+  // Invalidate root nodes cache
+  await cacheService.invalidateRootNodesCache(operation.discussionId);
+
+  sendSuccessResponse({
+    response,
+    message: 'Operation deleted successfully',
+    data: null,
+  });
+}
+
 const operationController = {
   createOperation,
   updateOperation,
+  deleteOperation,
   getOperationById,
   getOperations,
   getOperationsList,
